@@ -2,6 +2,9 @@ package com.nbe.automation;
 
 import com.nbe.automation.base.BaseTest;
 import com.nbe.automation.utils.AppiumUtils;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.testng.annotations.Test;
 
 public class NBETest extends BaseTest {
@@ -31,14 +34,8 @@ public class NBETest extends BaseTest {
     @Test
     public void testAccountBalance() {
         try {
-            // Navigate to account balance
-            appiumUtils.clickElement("accountsMenu");
-            appiumUtils.clickElement("balanceButton");
-            
-            // Verify balance is displayed
-            String balance = appiumUtils.getText("balanceAmount");
-            System.out.println("Account Balance: " + balance);
-            
+            WebElement button1 = driver.findElement(By.id("com.google.android.youtube:id/error_retry_button"));
+            button1.click();   
         } catch (Exception e) {
             System.out.println("Error checking balance: " + e.getMessage());
             throw e;

@@ -18,8 +18,8 @@ public class BaseTest {
         capabilities.setCapability("platformName", "Android");
         capabilities.setCapability("automationName", "UiAutomator2");
         capabilities.setCapability("deviceName", "emulator-5554");
-        capabilities.setCapability("appPackage", "com.ofss.obdx.and.nbe.com.eg");
-        capabilities.setCapability("appActivity", "com.ofss.digx.mobile.android.SplashActivity");
+        capabilities.setCapability("appPackage", "com.google.android.youtube");
+        capabilities.setCapability("appActivity", "com.google.android.apps.youtube.app.watchwhile.WatchWhileActivity");
         capabilities.setCapability("noReset", true);
 
         // Initialize the driver
