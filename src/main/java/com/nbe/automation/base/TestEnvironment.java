@@ -15,7 +15,7 @@ public class TestEnvironment {
 
     @BeforeMethod
     public void setUp() throws Exception {
-        LoggerUtil.info("Setting up test environment");
+        LoggerUtil.info("Initializing test environment");
         DesiredCapabilities capabilities = new DesiredCapabilities();
         capabilities.setCapability("platformName", "Android");
         capabilities.setCapability("automationName", "UiAutomator2");
@@ -27,20 +27,16 @@ public class TestEnvironment {
         capabilities.setCapability("newCommandTimeout", 60);
         capabilities.setCapability("autoGrantPermissions", true);
 
-        LoggerUtil.info("Initializing Android driver");
         driver = new AndroidDriver<>(URI.create("http://localhost:4723").toURL(), capabilities);
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        String sessionId = driver.getSessionId().toString();
-        LoggerUtil.info("The session ID is: " + sessionId);
-        LoggerUtil.info("Test environment setup completed");
+        LoggerUtil.info("Test environment initialized");
     }
 
-    // @AfterMethod
-    // public void tearDown() {
-    //     LoggerUtil.info("Tearing down test environment");
-    //     if (driver != null) {
-    //         driver.quit();
-    //         LoggerUtil.info("Driver closed successfully");
-    //     }
-    // }
+    @AfterMethod
+    public void tearDown() {
+        if (driver != null) {
+            driver.quit();
+            LoggerUtil.info("Test environment cleaned up");
+        }
+    }
 } 
