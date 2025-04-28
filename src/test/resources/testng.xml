@@ -3,7 +3,7 @@
 <suite name="NBE Automation Suite">
     <test name="NBE Tests">
         <classes>
-            <class name="com.nbe.automation.NBETest"/>
+            <class name="NBEAutomation.NBETest"/>
         </classes>
     </test>
 </suite> 
