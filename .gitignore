@@ -1,0 +1,31 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+*.log
+target/
+build/
+out/
+
+# IDE
+.idea/
+*.iml
+*.iws
+.vscode/
+.settings/
+.classpath
+.project
+.factorypath
+
+# System
+.DS_Store
+Thumbs.db
+*.log
+*.bak
+*.swp
+*~
+
+# Appium
+node_modules/
+appium.log 
