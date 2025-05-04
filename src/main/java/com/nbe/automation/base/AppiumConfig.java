@@ -25,12 +25,6 @@ public class AppiumConfig {
     @Value("${appium.automationName}")
     private String automationName;
 
-    @Value("${appium.appActivity}")
-    private String appActivity;
-
-    @Value("${appium.appPackage}")
-    private String appPackage;
-
     @Value("${appium.autoGrantPermissions}")
     private String autoGrantPermissions;
 
@@ -52,11 +46,23 @@ public class AppiumConfig {
     @Value("${appium.udid}")
     private String udid;
 
-    @Value("${user.id}")
-    private String userId;
+    @Value("${nbe.appium.appActivity}")
+    private String nbeAppActivity;
 
-    @Value("${user.password}")
-    private String userPassword;
+    @Value("${nbe.appium.appPackage}")
+    private String nbeAppPackage;
+
+    @Value("${nbe.user.id}")
+    private String nbeUserId;
+
+    @Value("${nbe.user.password}")
+    private String nbeUserPassword;
+
+    @Value("${youtube.appium.appActivity}")
+    private String youtubeAppActivity;
+
+    @Value("${youtube.appium.appPackage}")
+    private String youtubeAppPackage;
 
     @Bean(destroyMethod = "")
     @Scope("singleton")
@@ -71,8 +77,8 @@ public class AppiumConfig {
                     capabilities.setCapability("automationName", automationName);
                     capabilities.setCapability("deviceName", deviceName);
                     capabilities.setCapability("udid", udid);
-                    capabilities.setCapability("appPackage", appPackage);
-                    capabilities.setCapability("appActivity", appActivity);
+                    capabilities.setCapability("appPackage", youtubeAppPackage);
+                    capabilities.setCapability("appActivity", youtubeAppActivity);
                     capabilities.setCapability("noReset", noReset);
                     capabilities.setCapability("newCommandTimeout", newCommandTimeout);
                     capabilities.setCapability("autoGrantPermissions", autoGrantPermissions);
@@ -81,6 +87,7 @@ public class AppiumConfig {
                     LoggerUtil.info("Connecting to Appium server at: " + serverURL);
                     this.driver = new AndroidDriver(new URI(serverURL).toURL(), capabilities);
                     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+                    LoggerUtil.info("Current session: " + driver.getSessionId());
                     LoggerUtil.info("Test environment initialized");
                     return driver;
                 } catch (Exception e) {
@@ -95,8 +102,8 @@ public class AppiumConfig {
 
     //not tested
     public void updateAppPackageAndActivity(String appPackage, String appActivity) {
-        this.appPackage = appPackage;
-        this.appActivity = appActivity;
+        this.nbeAppPackage = appPackage;
+        this.nbeAppActivity = appActivity;
         reinitializeDriver();
     }
 
@@ -116,12 +123,12 @@ public class AppiumConfig {
         }
     }
 
-    public String getUserId() {
-        return this.userId;
+    public String getNbeUserId() {
+        return this.nbeUserId;
     }
 
-    public String getUserPassword() {
-        return this.userPassword;
+    public String getNbeUserPassword() {
+        return this.nbeUserPassword;
     }
 
     @PreDestroy

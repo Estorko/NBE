@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
+
 @Component
 public class LoginPage {
 
@@ -28,9 +29,9 @@ public class LoginPage {
     public void login() {
         try {
             LoggerUtil.info("Starting login process");
-            enterUserId(appiumConfig.getUserId());
+            enterUserId(appiumConfig.getNbeUserId());
             if (isPasswordScreenVisible()) {
-                enterPassword(appiumConfig.getUserPassword());
+                enterPassword(appiumConfig.getNbeUserPassword());
                 LoggerUtil.info("Login process completed successfully");
             } else {
                 LoggerUtil.error("Login failed - Password screen not visible");
@@ -45,8 +46,8 @@ public class LoginPage {
     private void enterUserId(String userId) {
         try {
             LoggerUtil.info("Entering user ID");
-            appiumUtils.sendKeysById(Locators.USER_ID_FIELD, userId);
-            appiumUtils.clickByText(Locators.LOGIN_BUTTON);
+            appiumUtils.sendKeysById(Locators.NBE_USER_ID_FIELD, userId);
+            appiumUtils.clickByText(Locators.NBE_LOGIN_BUTTON);
             LoggerUtil.info("User ID entered successfully");
         } catch (Exception e) {
             LoggerUtil.error("Error entering user ID: " + e.getMessage(), e);
@@ -57,13 +58,13 @@ public class LoginPage {
     private void enterPassword(String password) {
         try {
             LoggerUtil.info("Entering password");
-            appiumUtils.sendKeysById(Locators.PASSWORD_FIELD, password);
-            appiumUtils.waitForElementByText(Locators.LOGIN_BUTTON, 10);
-            if (appiumUtils.isDisplayedByText(Locators.LOGIN_BUTTON)) {
-                appiumUtils.clickByText(Locators.LOGIN_BUTTON);
+            appiumUtils.sendKeysById(Locators.NBE_PASSWORD_FIELD, password);
+            appiumUtils.waitForElementByText(Locators.NBE_LOGIN_BUTTON, 10);
+            if (appiumUtils.isDisplayedByText(Locators.NBE_LOGIN_BUTTON)) {
+                appiumUtils.clickByText(Locators.NBE_LOGIN_BUTTON);
                 // Wait for Accounts to be visible
-                appiumUtils.waitForElementByText(Locators.ACCOUNTS_TEXT, 10);
-                if (appiumUtils.isDisplayedByText(Locators.ACCOUNTS_TEXT)) {
+                appiumUtils.waitForElementByText(Locators.NBE_ACCOUNTS_TEXT, 10);
+                if (appiumUtils.isDisplayedByText(Locators.NBE_ACCOUNTS_TEXT)) {
                     LoggerUtil.info("Password entered successfully and Accounts screen is visible");
                 } else {
                     LoggerUtil.error("Accounts screen not visible after login");
@@ -82,7 +83,7 @@ public class LoginPage {
     public boolean isPasswordScreenVisible() {
         try {
             LoggerUtil.debug("Checking if password screen is visible");
-            return appiumUtils.isDisplayedById(Locators.PASSWORD_FIELD);
+            return appiumUtils.isDisplayedById(Locators.NBE_PASSWORD_FIELD);
         } catch (Exception e) {
             LoggerUtil.error("Error checking password screen visibility: " + e.getMessage(), e);
             return false;

@@ -31,12 +31,12 @@ public class AccountDetailsPage {
     public String getAccountNumber() {
         try {
             LoggerUtil.info("Getting account number");
-            appiumUtils.waitForElementByText(Locators.ACCOUNT_NUMBER_TEXT, 20);
-            if (appiumUtils.isDisplayedByText(Locators.ACCOUNT_NUMBER_TEXT)) {
+            appiumUtils.waitForElementByText(Locators.NBE_ACCOUNT_NUMBER_TEXT, 20);
+            if (appiumUtils.isDisplayedByText(Locators.NBE_ACCOUNT_NUMBER_TEXT)) {
                 String accountNumber = appiumUtils.getTextFromChildIndex(
-                        Locators.ACCOUNT_NUMBER_VIEW,
-                        Locators.ACCOUNT_NUMBER_PARENT_INDEX,
-                        Locators.ACCOUNT_NUMBER_CHILD_INDEX);
+                        Locators.NBE_ACCOUNT_NUMBER_VIEW,
+                        Locators.NBE_ACCOUNT_NUMBER_PARENT_INDEX,
+                        Locators.NBE_ACCOUNT_NUMBER_CHILD_INDEX);
 
                 if (accountNumber != null && !accountNumber.isEmpty()) {
                     LoggerUtil.info("Successfully retrieved account number");
@@ -58,12 +58,12 @@ public class AccountDetailsPage {
     public String getIban() {
         try {
             LoggerUtil.info("Getting IBAN");
-            appiumUtils.waitForElementByText(Locators.ACCOUNT_NUMBER_TEXT, 20);
-            if (appiumUtils.isDisplayedByText(Locators.ACCOUNT_NUMBER_TEXT)) {
+            appiumUtils.waitForElementByText(Locators.NBE_ACCOUNT_NUMBER_TEXT, 20);
+            if (appiumUtils.isDisplayedByText(Locators.NBE_ACCOUNT_NUMBER_TEXT)) {
                 String iban = appiumUtils.getTextFromChildIndex(
-                        Locators.ACCOUNT_NUMBER_VIEW,
-                        Locators.IBAN_PARENT_INDEX,
-                        Locators.IBAN_CHILD_INDEX);
+                        Locators.NBE_ACCOUNT_NUMBER_VIEW,
+                        Locators.NBE_IBAN_PARENT_INDEX,
+                        Locators.NBE_IBAN_CHILD_INDEX);
 
                 if (iban != null && !iban.isEmpty()) {
                     LoggerUtil.info("Successfully retrieved IBAN");
@@ -111,10 +111,10 @@ public class AccountDetailsPage {
         while (attempts < 3 && !logoutSuccess) {
             try {
                 LoggerUtil.info("Attempting to log out (try " + (attempts + 1) + ")");
-                appiumUtils.waitForElementByAccessibilityId(Locators.LOGOUT_INDEX_BUTTON, 5);
-                automationUtils.clickUntilVisible(Locators.LOGOUT_INDEX_BUTTON, Locators.LOGIN_BUTTON, 3);
-                appiumUtils.waitForElementByText(Locators.LOGIN_BUTTON, 5);
-                if (appiumUtils.isDisplayedByText(Locators.LOGIN_BUTTON)) {
+                appiumUtils.waitForElementByAccessibilityId(Locators.NBE_LOGOUT_INDEX_BUTTON, 5);
+                automationUtils.clickUntilVisible(Locators.NBE_LOGOUT_INDEX_BUTTON, Locators.NBE_LOGIN_BUTTON, 3);
+                appiumUtils.waitForElementByText(Locators.NBE_LOGIN_BUTTON, 5);
+                if (appiumUtils.isDisplayedByText(Locators.NBE_LOGIN_BUTTON)) {
                     logoutSuccess = true;
                     LoggerUtil.info("Logout completed successfully");
                     break;

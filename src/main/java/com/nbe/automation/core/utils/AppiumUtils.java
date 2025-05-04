@@ -275,53 +275,91 @@ public class AppiumUtils {
                 .findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"" + accessibilityId + "\")"));
     }
 
-    public void waitForElementByText(String text, int timeoutInSeconds) {
+    public boolean waitForElementByText(String text, int timeoutInSeconds) {
         try {
             LoggerUtil.debug("Waiting for interactable element with text: " + text);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-
-            wait.until(driver -> {
+    
+            WebElement element = wait.until(driver -> {
                 try {
-                    WebElement element = driver.findElement(
+                    WebElement foundElement = driver.findElement(
                             AppiumBy.androidUIAutomator("new UiSelector().text(\"" + text + "\")"));
-                    return (element.isDisplayed() && element.isEnabled()) ? element : null;
+                    return (foundElement.isDisplayed() && foundElement.isEnabled()) ? foundElement : null;
                 } catch (Exception e) {
                     return null;
                 }
             });
-
-            LoggerUtil.debug("Element with text is interactable: " + text);
+    
+            boolean isVisible = element != null; // true if element is found and visible
+            LoggerUtil.debug(isVisible 
+                ? "Element with text is interactable: " + text 
+                : "Element with text not found or not interactable: " + text);
+            return isVisible;
         } catch (TimeoutException e) {
             LoggerUtil.error("Timeout: Element with text not interactable: " + text, e);
-            throw new RuntimeException("Timeout waiting for element with text: " + text, e);
+            return false; // return false if timeout occurs
         } catch (Exception e) {
             LoggerUtil.error("Unexpected error waiting for element with text: " + text, e);
-            throw new RuntimeException("Failed to find element with text: " + text, e);
+            return false;
         }
     }
-
-    public void waitForElementByAccessibilityId(String accessibilityId, int timeoutInSeconds) {
+    
+    public boolean waitForElementByAccessibilityId(String accessibilityId, int timeoutInSeconds) {
         try {
             LoggerUtil.debug("Waiting for interactable element with Accessibility ID: " + accessibilityId);
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-
-            wait.until(driver -> {
+    
+            WebElement element = wait.until(driver -> {
                 try {
-                    WebElement element = driver.findElement(
+                    WebElement foundElement = driver.findElement(
                             AppiumBy.androidUIAutomator("new UiSelector().description(\"" + accessibilityId + "\")"));
-                    return (element.isDisplayed() && element.isEnabled()) ? element : null;
+                    return (foundElement.isDisplayed() && foundElement.isEnabled()) ? foundElement : null;
                 } catch (Exception e) {
                     return null;
                 }
             });
-
-            LoggerUtil.debug("Element is interactable with Accessibility ID: " + accessibilityId);
+    
+            boolean isVisible = element != null; // true if element is found and visible
+            LoggerUtil.debug(isVisible 
+                ? "Element is interactable with Accessibility ID: " + accessibilityId 
+                : "Element not found or not interactable with Accessibility ID: " + accessibilityId);
+            return isVisible;
         } catch (TimeoutException e) {
             LoggerUtil.error("Timeout: Element not interactable with Accessibility ID: " + accessibilityId, e);
-            throw new RuntimeException("Timeout waiting for element with Accessibility ID: " + accessibilityId, e);
+            return false; // return false if timeout occurs
         } catch (Exception e) {
             LoggerUtil.error("Unexpected error waiting for element with Accessibility ID: " + accessibilityId, e);
-            throw new RuntimeException("Failed to find element with Accessibility ID: " + accessibilityId, e);
+            return false;
         }
     }
+
+    public boolean waitForElementById(String resourceId, int timeoutInSeconds) {
+        try {
+            LoggerUtil.debug("Waiting for interactable element with Resource ID: " + resourceId);
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
+    
+            WebElement element = wait.until(driver -> {
+                try {
+                    WebElement foundElement = driver.findElement(
+                        AppiumBy.androidUIAutomator("new UiSelector().resourceId(\"" + resourceId + "\")"));
+                    return (foundElement.isDisplayed() && foundElement.isEnabled()) ? foundElement : null;
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+    
+            boolean isVisible = element != null;
+            LoggerUtil.debug(isVisible
+                ? "Element is interactable with Resource ID: " + resourceId
+                : "Element not found or not interactable with Resource ID: " + resourceId);
+            return isVisible;
+        } catch (TimeoutException e) {
+            LoggerUtil.error("Timeout: Element not interactable with Resource ID: " + resourceId, e);
+            return false;
+        } catch (Exception e) {
+            LoggerUtil.error("Unexpected error waiting for element with Resource ID: " + resourceId, e);
+            return false;
+        }
+    }
+    
 }

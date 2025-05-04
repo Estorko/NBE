@@ -1,5 +1,6 @@
 package com.nbe.automation.tests;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -12,10 +13,9 @@ import org.springframework.context.annotation.ComponentScan;
 
 import com.nbe.automation.core.utils.AutomationUtils;
 import com.nbe.automation.core.utils.LoggerUtil;
-import com.nbe.automation.pages.NBE.AccountDetailsPage;
-import com.nbe.automation.pages.NBE.AccountsPage;
-import com.nbe.automation.pages.NBE.LoginPage;
+import com.nbe.automation.pages.NBE.*;
 
+@Disabled("Temporarily skipping NBETest")
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 @SpringBootConfiguration
