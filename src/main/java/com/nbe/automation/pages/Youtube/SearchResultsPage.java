@@ -26,7 +26,8 @@ public class SearchResultsPage {
     public void clickOnChannel() {
         try {
             LoggerUtil.info("Clicking on 'View Channel' button");
-            appiumUtils.waitForElementByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON, 10);
+            appiumUtils.scrollToElementByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON);
+            appiumUtils.waitForElementByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON, 5);
             appiumUtils.clickByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON);
             LoggerUtil.info("Clicked on 'View Channel' button successfully");
         } catch (Exception e) {

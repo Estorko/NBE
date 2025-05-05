@@ -102,6 +102,8 @@
                         -XX:+EnableDynamicAgentLoading
                         -XX:-DisableAttachMechanism
                     </argLine>
+                    <parallel>methods</parallel>
+                    <threadCount>4</threadCount>
                     <includes>
                         <include>**/*Test.java</include>
                     </includes>

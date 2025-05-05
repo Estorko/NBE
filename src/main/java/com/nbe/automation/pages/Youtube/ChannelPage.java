@@ -38,22 +38,51 @@ public class ChannelPage {
         }
     }
 
+    // public boolean clickOnFirstVideo() {
+    // try {
+    // LoggerUtil.info("Clicking on first video");
+    // final WebElement recyclerView =
+    // appiumUtils.findById(Locators.YOUTUBE_SEARCH_RESULT_RECYCLER_VIEW);
+    // final List<WebElement> videos =
+    // recyclerView.findElements(AppiumBy.className("android.view.ViewGroup"));
+    // videos.get(Locators.YOUTUBE_CHANNEL_VIDEO_VIEW_INDEX).click();
+    // final boolean isVideoVisible =
+    // appiumUtils.waitForElementById(Locators.YOUTUBE_VIDEO_PLAY_VIEW_ID, 10);
+    // LoggerUtil.info(isVideoVisible
+    // ? "Video playback screen is visible after clicking the video."
+    // : "Video playback screen is NOT visible after clicking the video.");
+    // return isVideoVisible;
+    // } catch (Exception e) {
+    // LoggerUtil.error("Error clicking on first video: " + e.getMessage(), e);
+    // return false;
+    // }
+    // }
+
     public boolean clickOnFirstVideo() {
         try {
-            LoggerUtil.info("Clicking on first video");
+            LoggerUtil.debug("Clicking on first video with content-desc containing '- play video'");
+            appiumUtils.scrollDown();
+            Thread.sleep(1000);
             final WebElement recyclerView = appiumUtils.findById(Locators.YOUTUBE_SEARCH_RESULT_RECYCLER_VIEW);
-            final List<WebElement> videos = recyclerView.findElements(AppiumBy.className("android.view.ViewGroup"));
-            videos.get(Locators.YOUTUBE_CHANNEL_VIDEO_VIEW_INDEX).click();
-            final boolean isVideoVisible = appiumUtils.waitForElementById(Locators.YOUTUBE_VIDEO_PLAY_VIEW_ID, 10);
+            WebElement playableVideo = appiumUtils.findByContentDescContainingWithXPath(recyclerView,
+                    Locators.YOUTUBE_CHANNEL_VIDEO_VIEW_CONTENT_DESC);
+            if (playableVideo.equals(null)) {
+                LoggerUtil.warn("No video element with matching content-desc were found.");
+                return false;
+            }
+            LoggerUtil
+                    .info("Clicking on element with content-desc: " + playableVideo.getAttribute("content-desc"));
+            playableVideo.click();
+            boolean isVideoVisible = appiumUtils.waitForElementById(Locators.YOUTUBE_VIDEO_PLAY_VIEW_ID, 10);
             LoggerUtil.info(isVideoVisible
-                ? "Video playback screen is visible after clicking the video."
-                : "Video playback screen is NOT visible after clicking the video.");
+                    ? "Video playback screen is visible after clicking."
+                    : "Video playback screen is NOT visible after clicking.");
             return isVideoVisible;
+
         } catch (Exception e) {
-            LoggerUtil.error("Error clicking on first video: " + e.getMessage(), e);
+            LoggerUtil.error("Error clicking on first playable video: " + e.getMessage(), e);
             return false;
         }
     }
-    
-    
+
 }

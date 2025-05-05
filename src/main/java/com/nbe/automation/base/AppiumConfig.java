@@ -65,7 +65,8 @@ public class AppiumConfig {
     private String youtubeAppPackage;
 
     @Bean(destroyMethod = "")
-    @Scope("singleton")
+    // @Scope("singleton")
+    @Scope("prototype")
     public AndroidDriver getDriver() {
         synchronized (lock) {
             if (driver == null) {
@@ -83,6 +84,7 @@ public class AppiumConfig {
                     capabilities.setCapability("newCommandTimeout", newCommandTimeout);
                     capabilities.setCapability("autoGrantPermissions", autoGrantPermissions);
                     capabilities.setCapability("ignoreUnimportantViews", true);
+                    capabilities.setCapability("enforceXPath1", true);
 
                     LoggerUtil.info("Connecting to Appium server at: " + serverURL);
                     this.driver = new AndroidDriver(new URI(serverURL).toURL(), capabilities);
@@ -100,6 +102,15 @@ public class AppiumConfig {
         }
     }
 
+    private void startEmulator() {
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder("emulator", "-avd", "YourEmulatorName"); // Replace with your emulator name
+            processBuilder.start();
+            Thread.sleep(30000); // Wait for the emulator to boot up
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     //not tested
     public void updateAppPackageAndActivity(String appPackage, String appActivity) {
         this.nbeAppPackage = appPackage;

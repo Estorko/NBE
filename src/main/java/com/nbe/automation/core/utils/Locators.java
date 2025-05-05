@@ -12,7 +12,13 @@ public class Locators {
 
     // ===== Channel Page Locators =====
     public static final String YOUTUBE_CHANNEL_VIDEOS_TAB = "Videos";
-    public static final int YOUTUBE_CHANNEL_VIDEO_VIEW_INDEX = 7;  // First playable video is at index 7
+    
+    /*
+    * First playable video is at index 8 for emulator 'nexus_5_api_29_yt | 360 x 640 dp'
+    * First playable video is at index 7 for real device
+    */
+    // public static final int YOUTUBE_CHANNEL_VIDEO_VIEW_INDEX = 7;
+    public static final String YOUTUBE_CHANNEL_VIDEO_VIEW_CONTENT_DESC = "- play video";
 
     // ===== NBE Locators =====
     // ===== Login Page Locators =====
