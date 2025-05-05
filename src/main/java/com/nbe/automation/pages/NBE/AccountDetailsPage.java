@@ -1,6 +1,5 @@
 package com.nbe.automation.pages.NBE;
 
-import com.nbe.automation.base.AppiumConfig;
 import com.nbe.automation.core.utils.AppiumUtils;
 import com.nbe.automation.core.utils.AutomationUtils;
 import com.nbe.automation.core.utils.Locators;
@@ -11,20 +10,16 @@ import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
 import org.openqa.selenium.support.PageFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
-@Component
 public class AccountDetailsPage {
 
     @Autowired
     private AutomationUtils automationUtils;
     
     private final AppiumUtils appiumUtils;
-    private final AndroidDriver driver;
 
-    public AccountDetailsPage(AppiumConfig appiumConfig, AppiumUtils appiumUtils) {
+    public AccountDetailsPage(AndroidDriver driver, AppiumUtils appiumUtils) {
         this.appiumUtils = appiumUtils;
-        this.driver = appiumConfig.getDriver();
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 

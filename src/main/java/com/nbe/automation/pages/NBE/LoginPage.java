@@ -1,37 +1,33 @@
 package com.nbe.automation.pages.NBE;
 
-import com.nbe.automation.base.AppiumConfig;
+import com.nbe.automation.config.AppProperties;
 import com.nbe.automation.core.utils.AppiumUtils;
 import com.nbe.automation.core.utils.Locators;
 import com.nbe.automation.core.utils.LoggerUtil;
 
 import org.openqa.selenium.support.PageFactory;
-import org.springframework.stereotype.Component;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
 
-@Component
 public class LoginPage {
 
-    private final AppiumConfig appiumConfig;
     private final AppiumUtils appiumUtils;
-    private final AndroidDriver driver;
+    private final AppProperties appProperties;
 
-    public LoginPage(AppiumConfig appiumConfig, AppiumUtils appiumUtils) {
-        this.appiumConfig = appiumConfig;
+    public LoginPage(AndroidDriver driver, AppProperties appProperties, AppiumUtils appiumUtils) {
+        this.appProperties = appProperties;
         this.appiumUtils = appiumUtils;
-        this.driver = appiumConfig.getDriver();
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 
     public void login() {
         try {
             LoggerUtil.info("Starting login process");
-            enterUserId(appiumConfig.getNbeUserId());
+            enterUserId(appProperties.getNbeUserId());
             if (isPasswordScreenVisible()) {
-                enterPassword(appiumConfig.getNbeUserPassword());
+                enterPassword(appProperties.getNbeUserPassword());
                 LoggerUtil.info("Login process completed successfully");
             } else {
                 LoggerUtil.error("Login failed - Password screen not visible");

@@ -5,11 +5,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.openqa.selenium.support.PageFactory;
-import org.springframework.stereotype.Component;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
-@Component
 public class AutomationUtils {
 
     private final AppiumUtils appiumUtils;

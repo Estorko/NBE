@@ -1,9 +1,7 @@
 package com.nbe.automation.pages.Youtube;
 
 import org.openqa.selenium.support.PageFactory;
-import org.springframework.stereotype.Component;
 
-import com.nbe.automation.base.AppiumConfig;
 import com.nbe.automation.core.utils.AppiumUtils;
 import com.nbe.automation.core.utils.Locators;
 import com.nbe.automation.core.utils.LoggerUtil;
@@ -13,14 +11,13 @@ import io.appium.java_client.android.nativekey.AndroidKey;
 import io.appium.java_client.android.nativekey.KeyEvent;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
-@Component
 public class HomePage {
     private final AppiumUtils appiumUtils;
     private final AndroidDriver driver;
 
-    public HomePage(AppiumConfig appiumConfig, AppiumUtils appiumUtils) {
+    public HomePage(AndroidDriver driver, AppiumUtils appiumUtils) {
         this.appiumUtils = appiumUtils;
-        this.driver = appiumConfig.getDriver();
+        this.driver = driver;  // Inject the driver that is passed from the test class
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 

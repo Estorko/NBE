@@ -22,18 +22,27 @@ import com.nbe.automation.pages.NBE.*;
 @ComponentScan(basePackages = "com.nbe.automation")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class NBETest {
-    
-    @Autowired
+
     private AutomationUtils automationUtils;
-
-    @Autowired
     private AccountDetailsPage accountDetailsPage;
-
-    @Autowired
     private AccountsPage accountsPage;
-
-    @Autowired
     private LoginPage loginPage;
+
+    public void setAutomationUtils(AutomationUtils automationUtils) {
+        this.automationUtils = automationUtils;
+    }
+    
+    public void setAccountDetailsPage(AccountDetailsPage accountDetailsPage) {
+        this.accountDetailsPage = accountDetailsPage;
+    }
+
+    public void setAccountsPage(AccountsPage accountsPage) {
+        this.accountsPage = accountsPage;
+    }
+
+    public void setLoginPage(LoginPage loginPage) {
+        this.loginPage = loginPage;
+    }
 
     @Test
     @Order(1)

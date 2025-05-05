@@ -1,9 +1,7 @@
 package com.nbe.automation.pages.Youtube;
 
 import org.openqa.selenium.support.PageFactory;
-import org.springframework.stereotype.Component;
 
-import com.nbe.automation.base.AppiumConfig;
 import com.nbe.automation.core.utils.AppiumUtils;
 import com.nbe.automation.core.utils.Locators;
 import com.nbe.automation.core.utils.LoggerUtil;
@@ -11,15 +9,12 @@ import com.nbe.automation.core.utils.LoggerUtil;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
-@Component
 public class SearchResultsPage {
 
     private final AppiumUtils appiumUtils;
-    private final AndroidDriver driver;
 
-    public SearchResultsPage(AppiumConfig appiumConfig, AppiumUtils appiumUtils) {
+    public SearchResultsPage(AndroidDriver driver, AppiumUtils appiumUtils) {
         this.appiumUtils = appiumUtils;
-        this.driver = appiumConfig.getDriver();
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 
