@@ -21,7 +21,6 @@ public class DriverFactory {
     private static final ThreadLocal<AndroidDriver> threadDriver = new ThreadLocal<>();
     private final AppProperties appProperties;
 
-
     public DriverFactory(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
@@ -44,7 +43,7 @@ public class DriverFactory {
             caps.setCapability("enforceXPath1", true);
             caps.setCapability("ignoreHiddenApiPolicyError", true);
 
-            caps.setCapability("appWaitActivity", "*");
+            caps.setCapability("appWaitActivity", String.format("%s.*", appProperties.getYoutubeAppPackage()));
             caps.setCapability("appium:systemPort", systemPort);
             caps.setCapability("appium:chromeDriverPort", chromePort);
 

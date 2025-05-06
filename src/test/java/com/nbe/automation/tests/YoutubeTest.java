@@ -34,8 +34,9 @@ public class YoutubeTest {
     private ChannelPage channelPage;
     private HomePage homePage;
     private SearchResultsPage searchResultsPage;
+    private String udid;
 
-    private final String CHANNEL_NAME = "NBE";
+    private final String channelName = "NBE";
 
     @Autowired
     private EmulatorManager emulatorManager;
@@ -54,13 +55,13 @@ public class YoutubeTest {
 
     @BeforeAll
     void setUp() {
-        testLauncher.waitForDrivers(60000); // Waiting for drivers to be ready
+        testLauncher.waitForDrivers(30000); // Waiting for drivers to be ready
         UdidAssigner.assign(testLauncher.getAssignedUdids());
-        String udid = UdidAssigner.getAssignedUdid();
+        udid = UdidAssigner.getAssignedUdid();
         LoggerUtil.info("YTEST || UDID: " + udid);
         LoggerUtil.info("YTEST || DriverAvailable: " + driverFactory.isDriverAvailable(udid));
-        LoggerUtil.info("YTEST || Driver Capabilities: " + driverFactory.getDriver(udid).getCapabilities());
-        AndroidDriver driver = driverFactory.getDriver(udid); // Getting the driver instance
+        // LoggerUtil.info("YTEST || Driver Capabilities: " + driverFactory.getDriver(udid).getCapabilities());
+        AndroidDriver driver = driverFactory.getDriver(udid);
         driverFactory.assignDriverToCurrentThread(udid);
         homePage = new HomePage(driver, new AppiumUtils(driver));
         searchResultsPage = new SearchResultsPage(driver, new AppiumUtils(driver));
@@ -72,7 +73,7 @@ public class YoutubeTest {
     void search() {
         try {
             LoggerUtil.info("Starting search test");
-            homePage.search(CHANNEL_NAME);
+            homePage.search(channelName);
             LoggerUtil.info("Search test completed successfully");
         } catch (Exception e) {
             LoggerUtil.error("Error during search: " + e.getMessage(), e);
@@ -112,7 +113,8 @@ public class YoutubeTest {
     void tearDown() {
         LoggerUtil.info("Shutting down all emulators and appium servers");
         UdidAssigner.clear();
-        emulatorManager.killAllEmulators();
+        // testLauncher.killAppiumServerByPort(testLauncher.getAppiumPortForCurrentThread());
         appiumServerManager.killAllAppiumServers();
+        emulatorManager.killEmulatorByName(udid);
     }
 }

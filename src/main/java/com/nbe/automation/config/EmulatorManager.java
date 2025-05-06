@@ -139,4 +139,37 @@ public class EmulatorManager {
             LoggerUtil.error("Failed to kill emulators.");
         }
     }
+    
+    public void killEmulatorByName(String emulatorId) {
+        try {
+            // Run adb devices to list attached devices
+            Process listDevices = new ProcessBuilder("cmd.exe", "/c", "adb devices")
+                    .redirectErrorStream(true)
+                    .start();
+    
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(listDevices.getInputStream()))) {
+                var lines = reader.lines().collect(Collectors.toList());
+    
+                boolean emulatorFound = false;
+    
+                for (String line : lines) {
+                    if (line.contains(emulatorId)) {  // Check if the line contains the emulator ID
+                        new ProcessBuilder("cmd.exe", "/c", "adb -s " + emulatorId + " emu kill")
+                                .start();
+                        LoggerUtil.info("Killed emulator: " + emulatorId);
+                        emulatorFound = true;
+                        break;  // Exit loop once the emulator is killed
+                    }
+                }
+    
+                if (!emulatorFound) {
+                    LoggerUtil.warn("Emulator with ID " + emulatorId + " not found.");
+                }
+            }
+    
+        } catch (IOException e) {
+            e.printStackTrace();
+            LoggerUtil.error("Failed to kill emulator: " + emulatorId);
+        }
+    }
 }

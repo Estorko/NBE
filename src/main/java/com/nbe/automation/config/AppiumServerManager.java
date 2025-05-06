@@ -19,12 +19,11 @@ public class AppiumServerManager {
 
     public void startAppiumServer(int port, int bootstrapPort, int chromePort) {
         String command = String.format(
-            "appium -p %d --base-path /wd/hub --default-capabilities \"{\\\"systemPort\\\":%d,\\\"chromeDriverPort\\\":%d}\"",
-            port, bootstrapPort, chromePort
-        );
-    
+                "appium -p %d --base-path /wd/hub --default-capabilities \"{\\\"systemPort\\\":%d,\\\"chromeDriverPort\\\":%d}\"",
+                port, bootstrapPort, chromePort);
+
         LoggerUtil.info(String.format("Starting Appium server on port %d...", port));
-    
+
         try {
             ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", command);
             pb.inheritIO();
@@ -71,20 +70,36 @@ public class AppiumServerManager {
                 LoggerUtil.info("Appium server on port " + port + " is responding.");
                 return;
             }
-    
+
             try {
                 Thread.sleep(3000); // Poll every 3 seconds
             } catch (InterruptedException e) {
                 LoggerUtil.warn("Thread interrupted while waiting for Appium on port " + port);
                 Thread.currentThread().interrupt(); // Restore interrupted status
-    
+
                 // Log the stack trace for debugging purposes
                 LoggerUtil.error("Error occurred while waiting for Appium server on port " + port, e);
                 throw e; // Re-throw to propagate the interruption
             }
         }
-    
+
         throw new RuntimeException("Timed out waiting for Appium server on port " + port);
     }
-    
+
+    public void killAppiumServerByPort(String port) {
+        LoggerUtil.info("Shutting down Appium server for port: " + port);
+        try {
+            String command = "powershell.exe -Command \"Get-CimInstance Win32_Process | " +
+                    "Where-Object { $_.CommandLine -like '*appium*' -and $_.CommandLine -like '*--port " + port
+                    + "*' } | " +
+                    "ForEach-Object { Stop-Process -Id $_.ProcessId -Force }\"";
+
+            ProcessBuilder pb = new ProcessBuilder("cmd.exe", "/c", command);
+            pb.inheritIO();
+            pb.start();
+            LoggerUtil.info("Appium server on port " + port + " terminated.");
+        } catch (IOException e) {
+            LoggerUtil.error("Failed to terminate Appium server on port " + port, e);
+        }
+    }
 }

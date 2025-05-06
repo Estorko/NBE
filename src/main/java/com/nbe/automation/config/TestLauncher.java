@@ -21,9 +21,10 @@ public class TestLauncher {
     private final AppiumServerManager appiumServerManager;
     private final DriverFactory driverFactory;
     private final List<String> emulatorNames;
+    private final List<String> assignedUdids = Collections.synchronizedList(new ArrayList<>());
+    private final ThreadLocal<String> threadAppiumPort = ThreadLocal.withInitial(() -> null);
     private static final int BASEPORT = 4723;
     private final CountDownLatch driverReadyLatch;
-    private final List<String> assignedUdids = Collections.synchronizedList(new ArrayList<>());
     private final AppProperties appProperties;
 
     public TestLauncher(EmulatorManager emulatorManager, AppiumServerManager appiumServerManager,
@@ -84,6 +85,7 @@ public class TestLauncher {
                     }
                     // Thread.sleep(30000);
                     appiumServerManager.startAppiumServer(appiumPort, bootstrapPort, chromePort);
+                    threadAppiumPort.set(String.valueOf(appiumPort));
                     String serverUrl = String.format("http://127.0.0.1:%d/wd/hub", appiumPort);
                     driverFactory.createDriver(emulatorName, udid, serverUrl, bootstrapPort, chromePort);
 
@@ -114,5 +116,14 @@ public class TestLauncher {
 
     public List<String> getAssignedUdids() {
         return assignedUdids;
+    }
+
+    // Access the port in each thread
+    public String getAppiumPortForCurrentThread() {
+        return threadAppiumPort.get();
+    }
+
+    public void killAppiumServerByPort(String port) {
+        appiumServerManager.killAppiumServerByPort(port);
     }
 }
