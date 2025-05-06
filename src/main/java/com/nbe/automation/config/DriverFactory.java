@@ -18,7 +18,9 @@ import lombok.Getter;
 public class DriverFactory {
 
     private final Map<String, AndroidDriver> drivers = new ConcurrentHashMap<>();
+    private static final ThreadLocal<AndroidDriver> threadDriver = new ThreadLocal<>();
     private final AppProperties appProperties;
+
 
     public DriverFactory(AppProperties appProperties) {
         this.appProperties = appProperties;
@@ -42,12 +44,14 @@ public class DriverFactory {
             caps.setCapability("enforceXPath1", true);
             caps.setCapability("ignoreHiddenApiPolicyError", true);
 
+            caps.setCapability("appWaitActivity", "*");
             caps.setCapability("appium:systemPort", systemPort);
             caps.setCapability("appium:chromeDriverPort", chromePort);
 
             AndroidDriver driver = new AndroidDriver(new URI(serverUrl).toURL(), caps);
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
             drivers.put(udid, driver);
+            threadDriver.set(driver);
             return driver;
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize driver", e);
@@ -78,5 +82,13 @@ public class DriverFactory {
                 LoggerUtil.warn("Error quitting driver: " + e.getMessage());
             }
         });
+    }
+
+    public void assignDriverToCurrentThread(String udid) {
+        AndroidDriver driver = drivers.get(udid);
+        if (driver == null) {
+            throw new IllegalStateException("Driver not initialized for UDID: " + udid);
+        }
+        threadDriver.set(driver);
     }
 }

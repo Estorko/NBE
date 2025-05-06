@@ -8,16 +8,16 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 
+import com.nbe.automation.config.AppProperties;
 import com.nbe.automation.config.AppiumServerManager;
 import com.nbe.automation.config.DriverFactory;
 import com.nbe.automation.config.EmulatorManager;
 import com.nbe.automation.config.TestLauncher;
+import com.nbe.automation.config.UdidAssigner;
 import com.nbe.automation.core.utils.AppiumUtils;
 import com.nbe.automation.core.utils.LoggerUtil;
 import com.nbe.automation.pages.Youtube.*;
@@ -28,7 +28,7 @@ import io.appium.java_client.android.AndroidDriver;
 @SpringBootTest
 @ComponentScan(basePackages = "com.nbe.automation")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@Execution(ExecutionMode.CONCURRENT)
+// @Execution(ExecutionMode.CONCURRENT)
 public class YoutubeTest {
 
     private ChannelPage channelPage;
@@ -39,6 +39,9 @@ public class YoutubeTest {
 
     @Autowired
     private EmulatorManager emulatorManager;
+
+    @Autowired
+    private AppProperties appProperties;
 
     @Autowired
     private AppiumServerManager appiumServerManager;
@@ -52,13 +55,18 @@ public class YoutubeTest {
     @BeforeAll
     void setUp() {
         testLauncher.waitForDrivers(60000); // Waiting for drivers to be ready
-        String udid = emulatorManager.getEmulatorUdid(); // Assuming you have logic to get the UDID of the emulator
+        UdidAssigner.assign(testLauncher.getAssignedUdids());
+        String udid = UdidAssigner.getAssignedUdid();
+        LoggerUtil.info("YTEST || UDID: " + udid);
+        LoggerUtil.info("YTEST || DriverAvailable: " + driverFactory.isDriverAvailable(udid));
+        LoggerUtil.info("YTEST || Driver Capabilities: " + driverFactory.getDriver(udid).getCapabilities());
         AndroidDriver driver = driverFactory.getDriver(udid); // Getting the driver instance
+        driverFactory.assignDriverToCurrentThread(udid);
         homePage = new HomePage(driver, new AppiumUtils(driver));
         searchResultsPage = new SearchResultsPage(driver, new AppiumUtils(driver));
         channelPage = new ChannelPage(driver, new AppiumUtils(driver));
     }
-
+    
     @Test
     @Order(0)
     void search() {
@@ -103,6 +111,7 @@ public class YoutubeTest {
     @AfterAll
     void tearDown() {
         LoggerUtil.info("Shutting down all emulators and appium servers");
+        UdidAssigner.clear();
         emulatorManager.killAllEmulators();
         appiumServerManager.killAllAppiumServers();
     }

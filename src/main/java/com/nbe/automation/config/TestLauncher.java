@@ -1,5 +1,7 @@
 package com.nbe.automation.config;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
@@ -18,10 +20,11 @@ public class TestLauncher {
     private final EmulatorManager emulatorManager;
     private final AppiumServerManager appiumServerManager;
     private final DriverFactory driverFactory;
-    private final AppProperties appProperties;
     private final List<String> emulatorNames;
     private static final int BASEPORT = 4723;
     private final CountDownLatch driverReadyLatch;
+    private final List<String> assignedUdids = Collections.synchronizedList(new ArrayList<>());
+    private final AppProperties appProperties;
 
     public TestLauncher(EmulatorManager emulatorManager, AppiumServerManager appiumServerManager,
             DriverFactory driverFactory, AppProperties appProperties) {
@@ -40,16 +43,16 @@ public class TestLauncher {
 
             if (!allDriversReady) {
                 LoggerUtil.error("Timeout reached while waiting for all drivers to be initialized.");
-                emulatorManager.killAllEmulators();
                 appiumServerManager.killAllAppiumServers();
-                System.exit(1); 
+                emulatorManager.killAllEmulators();
+                System.exit(1);
             } else {
                 LoggerUtil.info("All drivers are ready.");
             }
         } catch (InterruptedException e) {
             LoggerUtil.error("Waiting for drivers was interrupted.");
             Thread.currentThread().interrupt();
-            System.exit(1); 
+            System.exit(1);
         }
     }
 
@@ -61,22 +64,30 @@ public class TestLauncher {
             final int index = i;
             executor.submit(() -> {
                 String emulatorName = emulatorNames.get(index);
-                int emulatorPort = 5554 + (index + 2);
+                int emulatorPort = 5554 + (index * 2);
                 int appiumPort = BASEPORT + index;
                 int bootstrapPort = 8200 + index;
                 int chromePort = 9515 + index;
 
                 try {
-                    emulatorManager.startEmulator(emulatorName, emulatorPort);
-                    
-                    emulatorManager.waitForBootCompletion(emulatorName, 120000);
-
-                    appiumServerManager.startAppiumServer(appiumPort, bootstrapPort, chromePort);
-
                     String udid = String.format("emulator-%d", emulatorPort);
+                    emulatorManager.startEmulator(emulatorName, emulatorPort);
+
+                    boolean online = emulatorManager.waitForDeviceOnline(udid, 60000);
+                    if (!online) {
+                        throw new RuntimeException("Device " + udid + " did not appear in adb.");
+                    }
+
+                    boolean booted = emulatorManager.waitForBootCompletion(udid, 60000);
+                    if (!booted) {
+                        throw new RuntimeException("Device " + udid + " did not complete boot.");
+                    }
+                    // Thread.sleep(30000);
+                    appiumServerManager.startAppiumServer(appiumPort, bootstrapPort, chromePort);
                     String serverUrl = String.format("http://127.0.0.1:%d/wd/hub", appiumPort);
                     driverFactory.createDriver(emulatorName, udid, serverUrl, bootstrapPort, chromePort);
 
+                    assignedUdids.add(udid);
                     LoggerUtil.info("Driver created successfully for " + udid);
                     driverReadyLatch.countDown();
 
@@ -99,5 +110,9 @@ public class TestLauncher {
             executor.shutdownNow();
             Thread.currentThread().interrupt();
         }
+    }
+
+    public List<String> getAssignedUdids() {
+        return assignedUdids;
     }
 }

@@ -1,13 +1,12 @@
 package com.nbe.automation.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.stream.Collectors;
 
 import com.nbe.automation.core.utils.LoggerUtil;
@@ -15,11 +14,11 @@ import com.nbe.automation.core.utils.LoggerUtil;
 @Component
 public class EmulatorManager {
 
-    @Autowired
-    private AppProperties appProperties;
+    private final AppProperties appProperties;
 
-    // Store emulator UDID
-    private String emulatorUdid;
+    public EmulatorManager(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
 
     public void startEmulator(String avdName, int port) throws IOException {
         String androidHome = System.getenv(appProperties.getAndroidHomeEnv());
@@ -46,67 +45,74 @@ public class EmulatorManager {
                 "-no-snapshot-save", "-no-audio", "-no-boot-anim");
 
         pb.directory(emulatorDir);
+        pb.redirectOutput(Redirect.DISCARD).redirectError(Redirect.DISCARD);
         pb.inheritIO();
 
         LoggerUtil.info(
                 "Starting emulator " + avdName + " on port " + port + " from " + emulatorExecutable.getAbsolutePath());
         pb.start();
-
-        // Wait for the emulator to boot up and assign the UDID
-        this.emulatorUdid = getEmulatorUdid(port);
     }
 
-    // Retrieve the UDID for the emulator by querying adb devices
-    private String getEmulatorUdid(int port) {
-        try {
-            Process adbProcess = new ProcessBuilder("adb", "devices").start();
-            try (BufferedReader reader = new BufferedReader(new InputStreamReader(adbProcess.getInputStream()))) {
-                List<String> devices = reader.lines().collect(Collectors.toList());
-
-                for (String device : devices) {
-                    if (device.startsWith("emulator-" + port)) {
-                        // Extract the emulator UDID
-                        return device.split("\\s+")[0];
-                    }
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            LoggerUtil.error("Failed to get emulator UDID: " + e.getMessage());
-        }
-        return null; // Return null if not found
-    }
-
-    // Get the UDID of the running emulator
-    public String getEmulatorUdid() {
-        return emulatorUdid;
-    }
-
-    public void waitForBootCompletion(String emulatorId, long timeoutMillis) {
-        long start = System.currentTimeMillis();
-        while (System.currentTimeMillis() - start < timeoutMillis) {
+    public boolean waitForBootCompletion(String emulatorId, long timeoutMillis) {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < timeoutMillis) {
             try {
-                Process process = new ProcessBuilder("adb", "-s", emulatorId, "shell", "getprop", "sys.boot_completed")
-                        .start();
+                Process process = new ProcessBuilder("adb", "-s", emulatorId, "shell", "getprop", "sys.boot_completed").start();
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line = reader.readLine();
                     if (line != null && line.trim().equals("1")) {
                         LoggerUtil.info("Emulator " + emulatorId + " is fully booted.");
-                        return;
+                        return true;
                     }
                 }
-                Thread.sleep(3000);
-            } catch (InterruptedException | IOException e) {
-                LoggerUtil.error("Error waiting for emulator boot: " + e.getMessage());
+            } catch (IOException e) {
+                LoggerUtil.warn("Error checking sys.boot_completed: " + e.getMessage());
+            }
+    
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                LoggerUtil.warn("Thread interrupted while waiting for emulator boot.");
                 Thread.currentThread().interrupt();
-                return;
+                return false;
             }
         }
-        throw new RuntimeException("Emulator " + emulatorId + " failed to boot within timeout");
+    
+        LoggerUtil.error("Timeout: Emulator " + emulatorId + " did not finish booting.");
+        return false;
     }
     
+
+    public boolean waitForDeviceOnline(String emulatorId, long timeoutMillis) {
+        long startTime = System.currentTimeMillis();
+        while (System.currentTimeMillis() - startTime < timeoutMillis) {
+            try {
+                Process process = new ProcessBuilder("adb", "devices").start();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        if (line.trim().startsWith(emulatorId) && line.contains("device")) {
+                            LoggerUtil.info("Emulator " + emulatorId + " appeared in adb devices.");
+                            return true;
+                        }
+                    }
+                }
+            } catch (IOException e) {
+                LoggerUtil.warn("Failed to check adb devices: " + e.getMessage());
+            }
     
+            try {
+                Thread.sleep(2000);
+            } catch (InterruptedException e) {
+                LoggerUtil.warn("Thread interrupted while waiting for device online.");
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
     
+        LoggerUtil.error("Timeout: Emulator " + emulatorId + " did not appear in adb devices.");
+        return false;
+    }
     
 
     public void killAllEmulators() {
@@ -123,14 +129,14 @@ public class EmulatorManager {
                         String emulatorId = line.split("\\s+")[0];
                         new ProcessBuilder("cmd.exe", "/c", "adb -s " + emulatorId + " emu kill")
                                 .start();
-                        System.out.println("Killed emulator: " + emulatorId);
+                        LoggerUtil.info("Killed emulator: " + emulatorId);
                     }
                 }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Failed to kill emulators.");
+            LoggerUtil.error("Failed to kill emulators.");
         }
     }
 }
