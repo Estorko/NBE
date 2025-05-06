@@ -31,9 +31,9 @@ import io.appium.java_client.android.AndroidDriver;
 @Execution(ExecutionMode.CONCURRENT)
 public class YoutubeTest {
 
-    private static ChannelPage channelPage;
-    private static HomePage homePage;
-    private static SearchResultsPage searchResultsPage;
+    private ChannelPage channelPage;
+    private HomePage homePage;
+    private SearchResultsPage searchResultsPage;
 
     private final String CHANNEL_NAME = "NBE";
 
@@ -43,13 +43,17 @@ public class YoutubeTest {
     @Autowired
     private AppiumServerManager appiumServerManager;
 
+    @Autowired
+    private DriverFactory driverFactory;
+
+    @Autowired
+    private TestLauncher testLauncher;
+
     @BeforeAll
-    static void setUp(@Autowired TestLauncher testLauncher,
-            @Autowired DriverFactory driverFactory,
-            @Autowired EmulatorManager emulatorManager) {
-        testLauncher.waitForDrivers();
-        String udid = emulatorManager.getEmulatorUdid();
-        AndroidDriver driver = driverFactory.getDriver(udid);
+    void setUp() {
+        testLauncher.waitForDrivers(60000); // Waiting for drivers to be ready
+        String udid = emulatorManager.getEmulatorUdid(); // Assuming you have logic to get the UDID of the emulator
+        AndroidDriver driver = driverFactory.getDriver(udid); // Getting the driver instance
         homePage = new HomePage(driver, new AppiumUtils(driver));
         searchResultsPage = new SearchResultsPage(driver, new AppiumUtils(driver));
         channelPage = new ChannelPage(driver, new AppiumUtils(driver));
@@ -102,5 +106,4 @@ public class YoutubeTest {
         emulatorManager.killAllEmulators();
         appiumServerManager.killAllAppiumServers();
     }
-
 }

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.nbe.automation.core.utils.LoggerUtil;
@@ -19,9 +18,11 @@ import lombok.Getter;
 public class DriverFactory {
 
     private final Map<String, AndroidDriver> drivers = new ConcurrentHashMap<>();
+    private final AppProperties appProperties;
 
-    @Autowired
-    private AppProperties appProperties;
+    public DriverFactory(AppProperties appProperties) {
+        this.appProperties = appProperties;
+    }
 
     public AndroidDriver createDriver(String deviceName, String udid, String serverUrl,
             int systemPort, int chromePort) {
@@ -30,7 +31,7 @@ public class DriverFactory {
             DesiredCapabilities caps = new DesiredCapabilities();
             caps.setCapability("platformName", appProperties.getPlatformName());
             caps.setCapability("automationName", appProperties.getAutomationName());
-            caps.setCapability("deviceName", appProperties.getDeviceName());
+            caps.setCapability("deviceName", deviceName);
             caps.setCapability("udid", udid);
             caps.setCapability("appPackage", appProperties.getYoutubeAppPackage());
             caps.setCapability("appActivity", appProperties.getYoutubeAppActivity());
@@ -39,6 +40,7 @@ public class DriverFactory {
             caps.setCapability("autoGrantPermissions", appProperties.getAutoGrantPermissions());
             caps.setCapability("ignoreUnimportantViews", true);
             caps.setCapability("enforceXPath1", true);
+            caps.setCapability("ignoreHiddenApiPolicyError", true);
 
             caps.setCapability("appium:systemPort", systemPort);
             caps.setCapability("appium:chromeDriverPort", chromePort);

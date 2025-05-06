@@ -82,6 +82,33 @@ public class EmulatorManager {
         return emulatorUdid;
     }
 
+    public void waitForBootCompletion(String emulatorId, long timeoutMillis) {
+        long start = System.currentTimeMillis();
+        while (System.currentTimeMillis() - start < timeoutMillis) {
+            try {
+                Process process = new ProcessBuilder("adb", "-s", emulatorId, "shell", "getprop", "sys.boot_completed")
+                        .start();
+                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                    String line = reader.readLine();
+                    if (line != null && line.trim().equals("1")) {
+                        LoggerUtil.info("Emulator " + emulatorId + " is fully booted.");
+                        return;
+                    }
+                }
+                Thread.sleep(3000);
+            } catch (InterruptedException | IOException e) {
+                LoggerUtil.error("Error waiting for emulator boot: " + e.getMessage());
+                Thread.currentThread().interrupt();
+                return;
+            }
+        }
+        throw new RuntimeException("Emulator " + emulatorId + " failed to boot within timeout");
+    }
+    
+    
+    
+    
+
     public void killAllEmulators() {
         try {
             Process listDevices = new ProcessBuilder("cmd.exe", "/c", "adb devices")

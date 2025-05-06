@@ -35,6 +35,9 @@ public class AppProperties {
     @Value("${appium.udid}")
     private String udid;
 
+    @Value("${emulator.names}")
+    private String emulatorNames;
+
     @Value("${nbe.appium.appActivity}")
     private String nbeAppActivity;
 
@@ -87,6 +90,10 @@ public class AppProperties {
 
     public String getUdid() {
         return udid;
+    }
+
+    public String getEmulatorNames() {
+        return emulatorNames;
     }
 
     public String getNbeAppActivity() {
