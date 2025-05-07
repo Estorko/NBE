@@ -1,6 +1,7 @@
 package com.nbe.automation.core.utils;
 
 public class Locators {
+    // ToDo: move to pages to follow P-O-M model
     // ===== Youtube Locators =====
     // ===== Home Page Locators =====
     public static final String YOUTUBE_SEARCH_BUTTON = "Search";

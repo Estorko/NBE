@@ -9,6 +9,7 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 import org.springframework.stereotype.Component;
 
 import com.nbe.automation.core.utils.LoggerUtil;
+
 import io.appium.java_client.android.AndroidDriver;
 import jakarta.annotation.PreDestroy;
 import lombok.Getter;
@@ -48,6 +49,7 @@ public class DriverFactory {
 
             AndroidDriver driver = new AndroidDriver(new URI(serverUrl).toURL(), caps);
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+            LoggerUtil.info(String.format("Driver created successfully for [%s]", udid), this.getClass());
             drivers.put(udid, driver);
             return driver;
         } catch (Exception e) {
@@ -63,9 +65,6 @@ public class DriverFactory {
         return driver;
     }
 
-    public boolean isDriverAvailable(String udid) {
-        return drivers.containsKey(udid);
-    }
 
     @PreDestroy
     public void quitAll() {

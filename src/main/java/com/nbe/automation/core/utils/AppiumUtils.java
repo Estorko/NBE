@@ -43,10 +43,8 @@ public class AppiumUtils {
     public WebElement findByText(String text) {
         LoggerUtil.debug("Finding element by text (case-insensitive): " + text, this.getClass());
         return driver.findElement(
-            AppiumBy.androidUIAutomator("new UiSelector().textMatches(\"(?i)^" + Pattern.quote(text) + "$\")")
-        );
+                AppiumBy.androidUIAutomator("new UiSelector().textMatches(\"(?i)^" + Pattern.quote(text) + "$\")"));
     }
-    
 
     public void clickById(String id) {
         LoggerUtil.debug("Clicking element by ID: " + id, this.getClass());
@@ -146,7 +144,8 @@ public class AppiumUtils {
     public boolean isDisplayedByAccessibilityId(String accessibilityId) {
         try {
             LoggerUtil.debug("Checking visibility of element by Accessibility ID: " + accessibilityId, this.getClass());
-            return findByAccessibilityId(accessibilityId).isDisplayed();
+            WebElement element = findByAccessibilityId(accessibilityId);
+            return element.isDisplayed();
         } catch (Exception e) {
             LoggerUtil.warn("Element not found by Accessibility ID: " + accessibilityId, this.getClass());
             return false;
@@ -175,7 +174,8 @@ public class AppiumUtils {
 
     public WebElement findByClassNameAndInstance(String className, int instance) {
         try {
-            LoggerUtil.debug("Finding element by class name: " + className + " and instance: " + instance, this.getClass());
+            LoggerUtil.debug("Finding element by class name: " + className + " and instance: " + instance,
+                    this.getClass());
             return driver.findElement(AppiumBy.androidUIAutomator(
                     "new UiSelector().className(\"" + className + "\").instance(" + instance + ")"));
         } catch (Exception e) {
@@ -270,7 +270,8 @@ public class AppiumUtils {
 
     public WebElement findByContentDescContainingWithXPath(WebElement parent, String partialContentDesc) {
         LoggerUtil.debug(
-                "Finding element within parent by partial (case-insensitive) content-desc: " + partialContentDesc, this.getClass());
+                "Finding element within parent by partial (case-insensitive) content-desc: " + partialContentDesc,
+                this.getClass());
         String lowered = partialContentDesc.toLowerCase();
         String xpath = ".//*[@content-desc and contains(translate(@content-desc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '"
                 + lowered + "')]";
@@ -279,21 +280,16 @@ public class AppiumUtils {
 
     public void scrollToElementByAccessibilityId(String accessibilityId) {
         LoggerUtil.debug("Scrolling down to element by accessibility ID: " + accessibilityId, this.getClass());
-        if (isDisplayedByAccessibilityId(accessibilityId)) {
-            LoggerUtil.debug("Element is already visible, no need to scroll", this.getClass());
-            return;
-        } else {
-            try {
-                String uiScrollable = "new UiScrollable(new UiSelector().scrollable(true))"
-                        + ".setAsVerticalList()"
-                        + ".scrollForward()" // Explicitly scroll forward (down)
-                        + ".scrollIntoView(new UiSelector().description(\"" + accessibilityId + "\"))";
-                driver.findElement(AppiumBy.androidUIAutomator(uiScrollable));
-                LoggerUtil.debug("Scrolled to element with accessibility ID: " + accessibilityId, this.getClass());
-            } catch (Exception e) {
-                LoggerUtil.error("Failed to scroll to element by accessibility ID: " + accessibilityId, e);
-                throw new RuntimeException("Scroll failed: " + e.getMessage(), e);
-            }
+        try {
+            String uiScrollable = "new UiScrollable(new UiSelector().scrollable(true))"
+                    + ".setAsVerticalList()"
+                    + ".scrollForward()" // scroll forward (down)
+                    + ".scrollIntoView(new UiSelector().description(\"" + accessibilityId + "\"))";
+            driver.findElement(AppiumBy.androidUIAutomator(uiScrollable));
+            LoggerUtil.debug("Scrolled to element with accessibility ID: " + accessibilityId, this.getClass());
+        } catch (Exception e) {
+            LoggerUtil.error("Failed to scroll to element by accessibility ID: " + accessibilityId, e);
+            throw new RuntimeException("Scroll failed: " + e.getMessage(), e);
         }
     }
 
@@ -316,7 +312,6 @@ public class AppiumUtils {
             }
         }
     }
-
 
     public boolean waitForElementByText(String text, int timeoutInSeconds) {
         try {
@@ -347,7 +342,8 @@ public class AppiumUtils {
 
     public boolean waitForElementByAccessibilityId(String accessibilityId, int timeoutInSeconds) {
         try {
-            LoggerUtil.debug("Waiting for interactable element with Accessibility ID: " + accessibilityId, this.getClass());
+            LoggerUtil.debug("Waiting for interactable element with Accessibility ID: " + accessibilityId,
+                    this.getClass());
             WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
             WebElement element = wait.until(activeDriver -> {
                 try {
@@ -361,7 +357,8 @@ public class AppiumUtils {
             boolean isVisible = element != null;
             LoggerUtil.debug(isVisible
                     ? "Element is interactable with Accessibility ID: " + accessibilityId
-                    : "Element not found or not interactable with Accessibility ID: " + accessibilityId, this.getClass());
+                    : "Element not found or not interactable with Accessibility ID: " + accessibilityId,
+                    this.getClass());
             return isVisible;
         } catch (TimeoutException e) {
             LoggerUtil.error("Timeout: Element not interactable with Accessibility ID: " + accessibilityId, e);

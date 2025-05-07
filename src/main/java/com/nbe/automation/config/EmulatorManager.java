@@ -31,7 +31,7 @@ public class EmulatorManager {
         }
 
         // Use full path to emulator.exe
-        File emulatorExecutable = new File(emulatorDir, "emulator.exe"); // Use just "emulator" on Linux/macOS
+        File emulatorExecutable = new File(emulatorDir, "emulator.exe");
         if (!emulatorExecutable.exists()) {
             throw new IllegalStateException("Emulator executable not found: " + emulatorExecutable.getAbsolutePath());
         }
@@ -44,15 +44,15 @@ public class EmulatorManager {
                 "-no-audio",
                 "-no-boot-anim",
                 "-no-snapshot-load"
-                // "-no-window",
+        // "-no-window",
         );
 
         pb.directory(emulatorDir);
         File outputFile = new File("logs/emulatorsLog.log");
         pb.redirectOutput(outputFile);
         pb.redirectError(outputFile);
-        LoggerUtil.info(
-                "Starting emulator " + avdName + " on port " + port + " from " + emulatorExecutable.getAbsolutePath(), this.getClass());
+        LoggerUtil.info(String.format("Starting emulator [%s] on port [%s] from '%s'", avdName, port,
+                emulatorExecutable.getAbsolutePath()), this.getClass());
         pb.start();
     }
 
@@ -65,7 +65,7 @@ public class EmulatorManager {
                 try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
                     String line = reader.readLine();
                     if (line != null && line.trim().equals("1")) {
-                        LoggerUtil.info("Emulator " + emulatorId + " is fully booted.", this.getClass());
+                        LoggerUtil.info(String.format("Emulator [%s] is fully booted.", emulatorId), this.getClass());
                         return true;
                     }
                 }
@@ -95,7 +95,8 @@ public class EmulatorManager {
                     String line;
                     while ((line = reader.readLine()) != null) {
                         if (line.trim().startsWith(emulatorId) && line.contains("device")) {
-                            LoggerUtil.info("Emulator " + emulatorId + " active in adb devices.", this.getClass());
+                            LoggerUtil.info(String.format("Emulator [%s] active in adb devices.", emulatorId),
+                                    this.getClass());
                             return true;
                         }
                     }
@@ -113,7 +114,8 @@ public class EmulatorManager {
             }
         }
 
-        LoggerUtil.error("Timeout: Emulator " + emulatorId + " did not appear in adb devices.", this.getClass());
+        LoggerUtil.error(String.format("Timeout: Emulator [%s] did not appear in adb devices.", emulatorId),
+                this.getClass());
         return false;
     }
 
@@ -131,7 +133,7 @@ public class EmulatorManager {
                         String emulatorId = line.split("\\s+")[0];
                         new ProcessBuilder("cmd.exe", "/c", "adb -s " + emulatorId + " emu kill")
                                 .start();
-                        LoggerUtil.info("Killed emulator: " + emulatorId, this.getClass());
+                        LoggerUtil.info(String.format("Killed emulator: [%s]", emulatorId), this.getClass());
                     }
                 }
             }
@@ -142,6 +144,7 @@ public class EmulatorManager {
         }
     }
 
+    // not currently used - enhance
     public static void killEmulatorByName(String emulatorId) {
         try {
             Process listDevices = new ProcessBuilder("cmd.exe", "/c", "adb devices")

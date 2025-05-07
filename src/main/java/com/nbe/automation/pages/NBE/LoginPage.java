@@ -1,11 +1,11 @@
 package com.nbe.automation.pages.NBE;
 
+import org.openqa.selenium.support.PageFactory;
+
 import com.nbe.automation.config.AppProperties;
 import com.nbe.automation.core.utils.AppiumUtils;
 import com.nbe.automation.core.utils.Locators;
 import com.nbe.automation.core.utils.LoggerUtil;
-
-import org.openqa.selenium.support.PageFactory;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;

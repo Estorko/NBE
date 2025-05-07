@@ -90,17 +90,15 @@ public class TestLauncher {
                     appiumServerManager.startAppiumServer(appiumPort, bootstrapPort, chromePort);
                     String serverUrl = String.format("http://127.0.0.1:%d/wd/hub", appiumPort);
                     driverFactory.createDriver(emulatorName, udid, serverUrl, bootstrapPort, chromePort);
-
                     assignedUdids.add(udid);
-                    LoggerUtil.info("Driver created successfully for " + udid, this.getClass());
                     driverReadyLatch.countDown();
 
                 } catch (Exception e) {
-                    LoggerUtil.error("Error during setup for " + emulatorName + ": " + e.getMessage(), e);
+                    LoggerUtil.error(String.format("Error during setup for [%s]: %s", emulatorName, e.getMessage()), e,
+                            this.getClass());
                 }
             });
         }
-
         shutdownExecutorService(executor);
     }
 
@@ -119,5 +117,4 @@ public class TestLauncher {
     public static List<String> getAssignedUdids() {
         return assignedUdids;
     }
-
 }

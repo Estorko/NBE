@@ -39,7 +39,7 @@ public class ChannelPage {
             final WebElement recyclerView = appiumUtils.findById(Locators.YOUTUBE_SEARCH_RESULT_RECYCLER_VIEW);
             WebElement playableVideo = appiumUtils.findByContentDescContainingWithXPath(recyclerView,
                     Locators.YOUTUBE_CHANNEL_VIDEO_VIEW_CONTENT_DESC);
-            if (playableVideo.equals(null)) {
+            if (playableVideo == null) {
                 LoggerUtil.warn("No video element with matching content-desc were found.", this.getClass());
                 return false;
             }
@@ -58,5 +58,4 @@ public class ChannelPage {
             return false;
         }
     }
-
 }
