@@ -140,7 +140,7 @@ public class EmulatorManager {
         }
     }
     
-    public void killEmulatorByName(String emulatorId) {
+    public static void killEmulatorByName(String emulatorId) {
         try {
             // Run adb devices to list attached devices
             Process listDevices = new ProcessBuilder("cmd.exe", "/c", "adb devices")

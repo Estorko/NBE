@@ -3,11 +3,14 @@ package com.nbe.automation.tests;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
@@ -24,17 +27,17 @@ import com.nbe.automation.pages.Youtube.*;
 
 import io.appium.java_client.android.AndroidDriver;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+// @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest
 @ComponentScan(basePackages = "com.nbe.automation")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-// @Execution(ExecutionMode.CONCURRENT)
+@Execution(ExecutionMode.CONCURRENT)
 public class YoutubeTest {
 
     private ChannelPage channelPage;
     private HomePage homePage;
     private SearchResultsPage searchResultsPage;
-    private String udid;
+    private static String udid;
 
     private final String channelName = "NBE";
 
@@ -53,14 +56,31 @@ public class YoutubeTest {
     @Autowired
     private TestLauncher testLauncher;
 
-    @BeforeAll
+    // @BeforeAll
+    // void setUp() {
+    //     testLauncher.waitForDrivers(30000); // Waiting for drivers to be ready
+    //     UdidAssigner.assign(testLauncher.getAssignedUdids());
+    //     udid = UdidAssigner.getAssignedUdid();
+    //     LoggerUtil.info("YTEST || UDID: " + udid);
+    //     LoggerUtil.info("YTEST || DriverAvailable: " + driverFactory.isDriverAvailable(udid));
+    //     // LoggerUtil.info("YTEST || Driver Capabilities: " + driverFactory.getDriver(udid).getCapabilities());
+    //     AndroidDriver driver = driverFactory.getDriver(udid);
+    //     driverFactory.assignDriverToCurrentThread(udid);
+    //     homePage = new HomePage(driver, new AppiumUtils(driver));
+    //     searchResultsPage = new SearchResultsPage(driver, new AppiumUtils(driver));
+    //     channelPage = new ChannelPage(driver, new AppiumUtils(driver));
+    // }
+    @BeforeEach
     void setUp() {
-        testLauncher.waitForDrivers(30000); // Waiting for drivers to be ready
-        UdidAssigner.assign(testLauncher.getAssignedUdids());
-        udid = UdidAssigner.getAssignedUdid();
-        LoggerUtil.info("YTEST || UDID: " + udid);
-        LoggerUtil.info("YTEST || DriverAvailable: " + driverFactory.isDriverAvailable(udid));
-        // LoggerUtil.info("YTEST || Driver Capabilities: " + driverFactory.getDriver(udid).getCapabilities());
+        // Wait for drivers if this is the first test method
+        if (udid == null) {
+            testLauncher.waitForDrivers(30000);
+            UdidAssigner.assign(testLauncher.getAssignedUdids());
+            udid = UdidAssigner.getAssignedUdid();
+            LoggerUtil.info("YTEST || UDID: " + udid);
+            LoggerUtil.info("YTEST || DriverAvailable: " + driverFactory.isDriverAvailable(udid));
+        }
+        
         AndroidDriver driver = driverFactory.getDriver(udid);
         driverFactory.assignDriverToCurrentThread(udid);
         homePage = new HomePage(driver, new AppiumUtils(driver));
@@ -110,11 +130,11 @@ public class YoutubeTest {
     }
 
     @AfterAll
-    void tearDown() {
+    static void tearDown() {
         LoggerUtil.info("Shutting down all emulators and appium servers");
         UdidAssigner.clear();
         // testLauncher.killAppiumServerByPort(testLauncher.getAppiumPortForCurrentThread());
-        appiumServerManager.killAllAppiumServers();
-        emulatorManager.killEmulatorByName(udid);
+        AppiumServerManager.killAllAppiumServers();
+        EmulatorManager.killEmulatorByName(udid);
     }
 }

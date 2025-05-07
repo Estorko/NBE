@@ -26,6 +26,7 @@ public class TestLauncher {
     private static final int BASEPORT = 4723;
     private final CountDownLatch driverReadyLatch;
     private final AppProperties appProperties;
+    private volatile boolean setupComplete = false;
 
     public TestLauncher(EmulatorManager emulatorManager, AppiumServerManager appiumServerManager,
             DriverFactory driverFactory, AppProperties appProperties) {
@@ -37,7 +38,11 @@ public class TestLauncher {
         this.driverReadyLatch = new CountDownLatch(emulatorNames.size());
     }
 
-    public void waitForDrivers(long timeoutMillis) {
+    public synchronized void waitForDrivers(long timeoutMillis) {
+        if (setupComplete) {
+            return; // Setup already done, no need to wait
+        }
+        
         try {
             LoggerUtil.info("Waiting for all drivers to be initialized...");
             boolean allDriversReady = driverReadyLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
@@ -49,6 +54,7 @@ public class TestLauncher {
                 System.exit(1);
             } else {
                 LoggerUtil.info("All drivers are ready.");
+                setupComplete = true;
             }
         } catch (InterruptedException e) {
             LoggerUtil.error("Waiting for drivers was interrupted.");
@@ -83,7 +89,7 @@ public class TestLauncher {
                     if (!booted) {
                         throw new RuntimeException("Device " + udid + " did not complete boot.");
                     }
-                    // Thread.sleep(30000);
+                    
                     appiumServerManager.startAppiumServer(appiumPort, bootstrapPort, chromePort);
                     threadAppiumPort.set(String.valueOf(appiumPort));
                     String serverUrl = String.format("http://127.0.0.1:%d/wd/hub", appiumPort);

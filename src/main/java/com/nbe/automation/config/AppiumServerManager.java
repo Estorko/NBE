@@ -36,7 +36,7 @@ public class AppiumServerManager {
         }
     }
 
-    public void killAllAppiumServers() {
+    public static void killAllAppiumServers() {
         try {
             String command = "powershell.exe -Command \"Get-CimInstance Win32_Process | " +
                     "Where-Object { $_.CommandLine -like '*appium*' } | " +
