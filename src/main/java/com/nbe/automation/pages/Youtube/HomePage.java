@@ -17,19 +17,19 @@ public class HomePage {
 
     public HomePage(AndroidDriver driver, AppiumUtils appiumUtils) {
         this.appiumUtils = appiumUtils;
-        this.driver = driver;  // Inject the driver that is passed from the test class
+        this.driver = driver;
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 
     public void search(String searchQuery) {
         try {
-            LoggerUtil.info("Starting search process");
+            LoggerUtil.info("Starting search process", this.getClass());
             appiumUtils.waitForElementByAccessibilityId(Locators.YOUTUBE_SEARCH_BUTTON, 10);
             appiumUtils.clickByAccessibilityId(Locators.YOUTUBE_SEARCH_BUTTON);
             appiumUtils.clickById(Locators.YOUTUBE_SEARCH_FIELD_ID);
             appiumUtils.sendKeysById(Locators.YOUTUBE_SEARCH_FIELD_ID, searchQuery);
             driver.pressKey(new KeyEvent(AndroidKey.ENTER));
-            LoggerUtil.info("Search process completed successfully");
+            LoggerUtil.info("Search process completed successfully", this.getClass());
         } catch (Exception e) {
             LoggerUtil.error("Error during search: " + e.getMessage(), e);
             throw new RuntimeException(e);

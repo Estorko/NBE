@@ -119,5 +119,4 @@ public class AppProperties {
     public String getYoutubeAppPackage() {
         return youtubeAppPackage;
     }
-
 }

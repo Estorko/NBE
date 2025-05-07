@@ -21,11 +21,9 @@ public class TestLauncher {
     private final AppiumServerManager appiumServerManager;
     private final DriverFactory driverFactory;
     private final List<String> emulatorNames;
-    private final List<String> assignedUdids = Collections.synchronizedList(new ArrayList<>());
-    private final ThreadLocal<String> threadAppiumPort = ThreadLocal.withInitial(() -> null);
+    private static final List<String> assignedUdids = Collections.synchronizedList(new ArrayList<>());
     private static final int BASEPORT = 4723;
     private final CountDownLatch driverReadyLatch;
-    private final AppProperties appProperties;
     private volatile boolean setupComplete = false;
 
     public TestLauncher(EmulatorManager emulatorManager, AppiumServerManager appiumServerManager,
@@ -33,31 +31,30 @@ public class TestLauncher {
         this.emulatorManager = emulatorManager;
         this.appiumServerManager = appiumServerManager;
         this.driverFactory = driverFactory;
-        this.appProperties = appProperties;
         this.emulatorNames = List.of(appProperties.getEmulatorNames().split(","));
         this.driverReadyLatch = new CountDownLatch(emulatorNames.size());
     }
 
     public synchronized void waitForDrivers(long timeoutMillis) {
         if (setupComplete) {
-            return; // Setup already done, no need to wait
+            return;
         }
-        
+
         try {
-            LoggerUtil.info("Waiting for all drivers to be initialized...");
+            LoggerUtil.info("Waiting for all drivers to be initialized...", this.getClass());
             boolean allDriversReady = driverReadyLatch.await(timeoutMillis, TimeUnit.MILLISECONDS);
 
             if (!allDriversReady) {
-                LoggerUtil.error("Timeout reached while waiting for all drivers to be initialized.");
+                LoggerUtil.error("Timeout reached while waiting for all drivers to be initialized.", this.getClass());
                 appiumServerManager.killAllAppiumServers();
                 emulatorManager.killAllEmulators();
                 System.exit(1);
             } else {
-                LoggerUtil.info("All drivers are ready.");
+                LoggerUtil.info("All drivers are ready.", this.getClass());
                 setupComplete = true;
             }
         } catch (InterruptedException e) {
-            LoggerUtil.error("Waiting for drivers was interrupted.");
+            LoggerUtil.error("Waiting for drivers was interrupted.", this.getClass());
             Thread.currentThread().interrupt();
             System.exit(1);
         }
@@ -89,14 +86,13 @@ public class TestLauncher {
                     if (!booted) {
                         throw new RuntimeException("Device " + udid + " did not complete boot.");
                     }
-                    
+
                     appiumServerManager.startAppiumServer(appiumPort, bootstrapPort, chromePort);
-                    threadAppiumPort.set(String.valueOf(appiumPort));
                     String serverUrl = String.format("http://127.0.0.1:%d/wd/hub", appiumPort);
                     driverFactory.createDriver(emulatorName, udid, serverUrl, bootstrapPort, chromePort);
 
                     assignedUdids.add(udid);
-                    LoggerUtil.info("Driver created successfully for " + udid);
+                    LoggerUtil.info("Driver created successfully for " + udid, this.getClass());
                     driverReadyLatch.countDown();
 
                 } catch (Exception e) {
@@ -120,16 +116,8 @@ public class TestLauncher {
         }
     }
 
-    public List<String> getAssignedUdids() {
+    public static List<String> getAssignedUdids() {
         return assignedUdids;
     }
 
-    // Access the port in each thread
-    public String getAppiumPortForCurrentThread() {
-        return threadAppiumPort.get();
-    }
-
-    public void killAppiumServerByPort(String port) {
-        appiumServerManager.killAppiumServerByPort(port);
-    }
 }

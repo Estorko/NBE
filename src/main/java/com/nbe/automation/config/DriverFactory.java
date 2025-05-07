@@ -18,7 +18,6 @@ import lombok.Getter;
 public class DriverFactory {
 
     private final Map<String, AndroidDriver> drivers = new ConcurrentHashMap<>();
-    private static final ThreadLocal<AndroidDriver> threadDriver = new ThreadLocal<>();
     private final AppProperties appProperties;
 
     public DriverFactory(AppProperties appProperties) {
@@ -28,7 +27,7 @@ public class DriverFactory {
     public AndroidDriver createDriver(String deviceName, String udid, String serverUrl,
             int systemPort, int chromePort) {
         try {
-            LoggerUtil.info("Creating driver for device: " + deviceName);
+            LoggerUtil.info("Creating driver for device: " + deviceName, this.getClass());
             DesiredCapabilities caps = new DesiredCapabilities();
             caps.setCapability("platformName", appProperties.getPlatformName());
             caps.setCapability("automationName", appProperties.getAutomationName());
@@ -50,15 +49,12 @@ public class DriverFactory {
             AndroidDriver driver = new AndroidDriver(new URI(serverUrl).toURL(), caps);
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
             drivers.put(udid, driver);
-            threadDriver.set(driver);
             return driver;
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize driver", e);
         }
     }
 
-    // Add getDriver() to retrieve the driver for a specific device (using UDID or
-    // deviceName)
     public AndroidDriver getDriver(String udid) {
         AndroidDriver driver = drivers.get(udid);
         if (driver == null) {
@@ -67,7 +63,6 @@ public class DriverFactory {
         return driver;
     }
 
-    // Utility method to check if a driver exists for a specific UDID
     public boolean isDriverAvailable(String udid) {
         return drivers.containsKey(udid);
     }
@@ -78,16 +73,8 @@ public class DriverFactory {
             try {
                 driver.quit();
             } catch (Exception e) {
-                LoggerUtil.warn("Error quitting driver: " + e.getMessage());
+                LoggerUtil.warn("Error quitting driver: " + e.getMessage(), this.getClass());
             }
         });
-    }
-
-    public void assignDriverToCurrentThread(String udid) {
-        AndroidDriver driver = drivers.get(udid);
-        if (driver == null) {
-            throw new IllegalStateException("Driver not initialized for UDID: " + udid);
-        }
-        threadDriver.set(driver);
     }
 }

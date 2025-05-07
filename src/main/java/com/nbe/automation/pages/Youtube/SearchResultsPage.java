@@ -20,13 +20,15 @@ public class SearchResultsPage {
 
     public void clickOnChannel() {
         try {
-            LoggerUtil.info("Clicking on 'View Channel' button");
+            LoggerUtil.info("Clicking on 'View Channel' button", this.getClass());
             appiumUtils.scrollToElementByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON);
-            appiumUtils.waitForElementByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON, 5);
+            // appiumUtils.waitForElementByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON,
+            // 5);
             appiumUtils.clickByAccessibilityId(Locators.YOUTUBE_SEARCH_RESULT_VIEW_CHANNEL_BUTTON);
-            LoggerUtil.info("Clicked on 'View Channel' button successfully");
+            LoggerUtil.info("Clicked on 'View Channel' button successfully", this.getClass());
         } catch (Exception e) {
-            LoggerUtil.error("Error clicking on 'View Channel' button: " + e.getMessage(), e);
+            LoggerUtil.error(String.format("Error clicking on 'View Channel' button: %s", e.getMessage()), e,
+                    this.getClass());
             throw new RuntimeException(e);
         }
     }

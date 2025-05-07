@@ -46,11 +46,11 @@ public class AutomationUtils {
                 appiumUtils.clickByAccessibilityId(clickId);
                 Thread.sleep(300);
                 if (appiumUtils.isDisplayedByText(confirmationText)) {
-                    LoggerUtil.debug("Click successful on attempt " + (i + 1));
+                    LoggerUtil.debug("Click successful on attempt " + (i + 1), this.getClass());
                     return;
                 }
             } catch (Exception e) {
-                LoggerUtil.warn("Click attempt " + (i + 1) + " failed: " + e.getMessage());
+                LoggerUtil.warn("Click attempt " + (i + 1) + " failed: " + e.getMessage(), this.getClass());
             }
         }
         throw new RuntimeException("Element not visible after clicking " + maxTries + " times");

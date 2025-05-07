@@ -20,12 +20,12 @@ public class AccountsPage {
 
     public void navigateToAccountDetails() {
         try {
-            LoggerUtil.info("Navigating to account details");
+            LoggerUtil.info("Navigating to account details", this.getClass());
             appiumUtils.waitForElementByText(Locators.NBE_ACCOUNTS_TEXT, 20);
             appiumUtils.clickByText(Locators.NBE_ACCOUNTS_TEXT);
             appiumUtils.clickById(Locators.NBE_ACCOUNT_DROPDOWN);
             appiumUtils.clickByText(Locators.NBE_ACCOUNT_DETAILS_TEXT);
-            LoggerUtil.info("Successfully navigated to account details");
+            LoggerUtil.info("Successfully navigated to account details", this.getClass());
         } catch (Exception e) {
             LoggerUtil.error("Error navigating to account details: " + e.getMessage(), e);
             throw new RuntimeException(e);

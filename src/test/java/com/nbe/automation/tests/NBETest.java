@@ -20,7 +20,7 @@ import com.nbe.automation.pages.NBE.*;
 @SpringBootConfiguration
 @ComponentScan(basePackages = "com.nbe.automation")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class NBETest {
+class NBETest {
 
     private AutomationUtils automationUtils;
     private AccountDetailsPage accountDetailsPage;
@@ -30,7 +30,7 @@ public class NBETest {
     public void setAutomationUtils(AutomationUtils automationUtils) {
         this.automationUtils = automationUtils;
     }
-    
+
     public void setAccountDetailsPage(AccountDetailsPage accountDetailsPage) {
         this.accountDetailsPage = accountDetailsPage;
     }
@@ -47,11 +47,11 @@ public class NBETest {
     @Order(1)
     void login() {
         try {
-            LoggerUtil.info("Starting login test");
+            LoggerUtil.info("Starting login test", this.getClass());
             loginPage.login();
-            LoggerUtil.info("Login test completed successfully");
+            LoggerUtil.info("Login test completed successfully", this.getClass());
         } catch (Exception e) {
-            LoggerUtil.error("Error during login: " + e.getMessage(), e);
+            LoggerUtil.error(String.format("Error during login: %s", e.getMessage()), e, this.getClass());
             throw new RuntimeException(e);
         }
     }
@@ -60,11 +60,11 @@ public class NBETest {
     @Order(2)
     void selectAccount() {
         try {
-            LoggerUtil.info("Selecting account");
+            LoggerUtil.info("Selecting account", this.getClass());
             accountsPage.navigateToAccountDetails();
-            LoggerUtil.info("Account selection completed successfully");
+            LoggerUtil.info("Account selection completed successfully", this.getClass());
         } catch (Exception e) {
-            LoggerUtil.error("Error selecting account: " + e.getMessage(), e);
+            LoggerUtil.error(String.format("Error selecting account: %s", e.getMessage()), e, this.getClass());
             throw new RuntimeException(e);
         }
     }
@@ -73,17 +73,17 @@ public class NBETest {
     @Order(3)
     void getAccountNumber() {
         try {
-            LoggerUtil.info("Getting account details");
+            LoggerUtil.info("Getting account details", this.getClass());
             String accountNumber = accountDetailsPage.getAccountNumber();
             String iban = accountDetailsPage.getIban();
 
             String maskedAccountNumber = automationUtils.maskAccountNumber(accountNumber);
             String maskedIban = automationUtils.maskAccountNumber(iban);
 
-            LoggerUtil.info("Masked account number: " + maskedAccountNumber);
-            LoggerUtil.info("Masked IBAN: " + maskedIban);
+            LoggerUtil.info("Masked account number: " + maskedAccountNumber, this.getClass());
+            LoggerUtil.info("Masked IBAN: " + maskedIban, this.getClass());
         } catch (Exception e) {
-            LoggerUtil.error("Error getting account details: " + e.getMessage(), e);
+            LoggerUtil.error(String.format("Error getting account details: %s", e.getMessage()), e, this.getClass());
             throw new RuntimeException(e);
         }
     }
@@ -92,14 +92,14 @@ public class NBETest {
     @Order(4)
     void verifyScroll() {
         try {
-            LoggerUtil.info("Starting scroll test");
+            LoggerUtil.info("Starting scroll test", this.getClass());
             accountDetailsPage.scrollDown();
             Thread.sleep(1000);
             accountDetailsPage.scrollUp();
             Thread.sleep(1000);
-            LoggerUtil.info("Scroll test completed successfully");
+            LoggerUtil.info("Scroll test completed successfully", this.getClass());
         } catch (Exception e) {
-            LoggerUtil.error("Error during scroll test: " + e.getMessage(), e);
+            LoggerUtil.error(String.format("Error during scroll test: %s", e.getMessage()), e, this.getClass());
             throw new RuntimeException(e);
         }
     }
@@ -108,11 +108,11 @@ public class NBETest {
     @Order(5)
     void logOut() {
         try {
-            LoggerUtil.info("Starting logout test");
+            LoggerUtil.info("Starting logout test", this.getClass());
             accountDetailsPage.logOut();
-            LoggerUtil.info("Logout test completed successfully");
+            LoggerUtil.info("Logout test completed successfully", this.getClass());
         } catch (Exception e) {
-            LoggerUtil.error("Error during logout test: " + e.getMessage(), e);
+            LoggerUtil.error(String.format("Error during logout test: %s", e.getMessage()), e, this.getClass());
             throw new RuntimeException(e);
         }
     }

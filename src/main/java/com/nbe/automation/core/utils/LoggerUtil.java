@@ -4,30 +4,55 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class LoggerUtil {
-    private static final String LOGGER_NAME = "NBEAutomation";
-    private static final Logger logger = LogManager.getLogger(LOGGER_NAME);
 
-    public static Logger getLogger() {
-        return logger;
+    public static void info(String message, Class<?> clazz) {
+        LogManager.getLogger(clazz).info(message);
     }
 
-    public static void info(String message) {
-        logger.info(message);
+    public static void debug(String message, Class<?> clazz) {
+        LogManager.getLogger(clazz).debug(message);
     }
 
-    public static void error(String message) {
-        logger.error(message);
+    public static void warn(String message, Class<?> clazz) {
+        LogManager.getLogger(clazz).warn(message);
     }
 
-    public static void error(String message, Throwable t) {
-        logger.error(message, t);
+    public static void error(String message, Exception e) {
+        LogManager.getLogger(e).error(message);
     }
 
-    public static void warn(String message) {
-        logger.warn(message);
+    public static void error(String message, Throwable t, Class<?> clazz) {
+        LogManager.getLogger(clazz).error(message, t);
+    }
+    
+    public static void error(String message, Class<?> clazz) {
+        LogManager.getLogger(clazz).error(message);
     }
 
-    public static void debug(String message) {
-        logger.debug(message);
-    }
-} 
+    // // Optional: keep default methods using static logger if needed
+    // private static final Logger defaultLogger = LogManager.getLogger("NBEAutomation");
+
+    // public static Logger getLogger() {
+    //     return defaultLogger;
+    // }
+
+    // public static void info(String message) {
+    //     defaultLogger.info(message);
+    // }
+
+    // public static void debug(String message) {
+    //     defaultLogger.debug(message);
+    // }
+
+    // public static void warn(String message) {
+    //     defaultLogger.warn(message);
+    // }
+
+    // public static void error(String message) {
+    //     defaultLogger.error(message);
+    // }
+
+    // public static void error(String message, Throwable t) {
+    //     defaultLogger.error(message, t);
+    // }
+}
