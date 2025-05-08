@@ -5,11 +5,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-import org.springframework.stereotype.Component;
+import com.nbe.automation.utils.LoggerUtil;
 
-import com.nbe.automation.core.utils.LoggerUtil;
-
-@Component
 public class EmulatorManager {
 
     private final AppProperties appProperties;
@@ -19,6 +16,13 @@ public class EmulatorManager {
     }
 
     public void startEmulator(String avdName, int port) throws IOException {
+        String udid = String.format("emulator-%d", port);
+        if (isEmulatorVisible(udid)) {
+            LoggerUtil.info(String.format("Emulator [%s] is already online and visible. Skipping start.", avdName),
+                    this.getClass());
+            return;
+        }
+
         String androidHome = System.getenv(appProperties.getAndroidHomeEnv());
         if (androidHome == null || androidHome.isBlank()) {
             throw new IllegalStateException("ANDROID_HOME environment variable is not set.");
@@ -44,8 +48,8 @@ public class EmulatorManager {
                 "-no-audio",
                 "-no-boot-anim",
                 "-no-snapshot-load"
-        // "-no-window",
-        );
+                // "-no-window",
+                );
 
         pb.directory(emulatorDir);
         File outputFile = new File("logs/emulatorsLog.log");
@@ -89,22 +93,10 @@ public class EmulatorManager {
     public boolean waitForDeviceOnline(String emulatorId, long timeoutMillis) {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < timeoutMillis) {
-            try {
-                Process process = new ProcessBuilder("adb", "devices").start();
-                try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        if (line.trim().startsWith(emulatorId) && line.contains("device")) {
-                            LoggerUtil.info(String.format("Emulator [%s] active in adb devices.", emulatorId),
-                                    this.getClass());
-                            return true;
-                        }
-                    }
-                }
-            } catch (IOException e) {
-                LoggerUtil.warn("Failed to check adb devices: " + e.getMessage(), this.getClass());
+            if (isEmulatorVisible(emulatorId)) {
+                LoggerUtil.info(String.format("Emulator [%s] is now online.", emulatorId), this.getClass());
+                return true;
             }
-
             try {
                 Thread.sleep(2000);
             } catch (InterruptedException e) {
@@ -113,8 +105,7 @@ public class EmulatorManager {
                 return false;
             }
         }
-
-        LoggerUtil.error(String.format("Timeout: Emulator [%s] did not appear in adb devices.", emulatorId),
+        LoggerUtil.error(String.format("Timeout: Emulator [%s] did not appear online within the timeout.", emulatorId),
                 this.getClass());
         return false;
     }
@@ -142,6 +133,37 @@ public class EmulatorManager {
             e.printStackTrace();
             LoggerUtil.error("Failed to kill emulators.", this.getClass());
         }
+    }
+
+    private boolean isEmulatorVisible(String emulatorId) {
+        Process process = null;
+        try {
+            process = new ProcessBuilder("adb", "devices").start();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    if (line.trim().startsWith(emulatorId) && line.contains("device")) {
+                        LoggerUtil.info(String.format("Emulator [%s] active in adb devices.", emulatorId),
+                                this.getClass());
+                        return true;
+                    }
+                }
+            }
+            int exitCode = process.waitFor();
+            if (exitCode != 0) {
+                LoggerUtil.warn("adb command failed with exit code: " + exitCode, this.getClass());
+            }
+        } catch (IOException e) {
+            LoggerUtil.warn("Failed to check adb devices: " + e.getMessage(), this.getClass());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LoggerUtil.warn("adb process was interrupted: " + e.getMessage(), this.getClass());
+        } finally {
+            if (process != null) {
+                process.destroy();
+            }
+        }
+        return false;
     }
 
     // not currently used - enhance

@@ -1,4 +1,4 @@
-package com.nbe.automation.core.utils;
+package com.nbe.automation.utils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -6,14 +6,15 @@ import java.util.List;
 
 import org.openqa.selenium.support.PageFactory;
 
+import com.nbe.automation.base.BasePage;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
 public class AutomationUtils {
 
-    private final AppiumUtils appiumUtils;
+    private final BasePage appiumUtils;
 
-    public AutomationUtils(AndroidDriver driver, AppiumUtils appiumUtils) {
+    public AutomationUtils(AndroidDriver driver, BasePage appiumUtils) {
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
         this.appiumUtils = appiumUtils;
     }

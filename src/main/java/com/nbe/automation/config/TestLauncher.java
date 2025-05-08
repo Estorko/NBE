@@ -8,13 +8,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.springframework.stereotype.Component;
+import com.nbe.automation.utils.LoggerUtil;
 
-import com.nbe.automation.core.utils.LoggerUtil;
 
-import jakarta.annotation.PostConstruct;
-
-@Component
 public class TestLauncher {
 
     private final EmulatorManager emulatorManager;
@@ -60,7 +56,7 @@ public class TestLauncher {
         }
     }
 
-    @PostConstruct
+    // @PostConstruct
     public void startAll() {
         ExecutorService executor = Executors.newFixedThreadPool(emulatorNames.size());
 

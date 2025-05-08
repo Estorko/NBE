@@ -1,10 +1,11 @@
-package com.nbe.automation.core.utils;
+package com.nbe.automation.base;
 
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
@@ -12,16 +13,23 @@ import org.openqa.selenium.interactions.Sequence;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import com.nbe.automation.utils.LoggerUtil;
+
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
-public class AppiumUtils {
+public class BasePage {
     private final AndroidDriver driver;
 
-    public AppiumUtils(AndroidDriver driver) {
+    public BasePage(AndroidDriver driver) {
         this.driver = driver;
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
+    }
+
+    public WebElement find(By locator) {
+        LoggerUtil.debug("Finding element by Accessibility ID: " + locator.toString(), this.getClass());
+        return driver.findElement(locator);
     }
 
     public WebElement findById(String id) {
@@ -37,7 +45,7 @@ public class AppiumUtils {
 
     public WebElement findByXPath(String xpath) {
         LoggerUtil.debug("Finding element by XPath: " + xpath, this.getClass());
-        return driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().xpath(\"" + xpath + "\")"));
+        return driver.findElement(AppiumBy.xpath(xpath));
     }
 
     public WebElement findByText(String text) {
@@ -54,18 +62,6 @@ public class AppiumUtils {
     public void clickByAccessibilityId(String accessibilityId) {
         LoggerUtil.debug("Clicking element by Accessibility ID: " + accessibilityId, this.getClass());
         findByAccessibilityId(accessibilityId).click();
-    }
-
-    // not used
-    public void clickByXPath(String xpath) {
-        try {
-            LoggerUtil.debug("Clicking element by XPath: " + xpath, this.getClass());
-            String text = xpath.replaceAll(".*@text='([^']*)'.*", "$1");
-            driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().text(\"" + text + "\")")).click();
-        } catch (Exception e) {
-            LoggerUtil.error("Error clicking element by XPath: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to click element by XPath: " + xpath, e);
-        }
     }
 
     public void clickByText(String text) {

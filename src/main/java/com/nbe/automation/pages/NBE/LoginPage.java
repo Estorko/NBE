@@ -2,20 +2,20 @@ package com.nbe.automation.pages.NBE;
 
 import org.openqa.selenium.support.PageFactory;
 
+import com.nbe.automation.base.BasePage;
 import com.nbe.automation.config.AppProperties;
-import com.nbe.automation.core.utils.AppiumUtils;
-import com.nbe.automation.core.utils.Locators;
-import com.nbe.automation.core.utils.LoggerUtil;
+import com.nbe.automation.utils.Locators;
+import com.nbe.automation.utils.LoggerUtil;
 
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
 public class LoginPage {
 
-    private final AppiumUtils appiumUtils;
+    private final BasePage appiumUtils;
     private final AppProperties appProperties;
 
-    public LoginPage(AndroidDriver driver, AppProperties appProperties, AppiumUtils appiumUtils) {
+    public LoginPage(AndroidDriver driver, AppProperties appProperties, BasePage appiumUtils) {
         this.appProperties = appProperties;
         this.appiumUtils = appiumUtils;
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);

@@ -1,4 +1,4 @@
-package com.nbe.automation.core.utils;
+package com.nbe.automation.utils;
 
 import org.apache.logging.log4j.LogManager;
 

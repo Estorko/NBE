@@ -19,7 +19,7 @@ import com.nbe.automation.utils.LoggerUtil;
 import io.appium.java_client.android.AndroidDriver;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class YoutubeParallelTest extends BaseTest {
+class YoutubeParallelTest2 extends BaseTest {
 
     private static final String CHANNEL_NAME = "NBE";
     private ChannelPage channelPage;

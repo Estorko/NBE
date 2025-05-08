@@ -1,19 +1,22 @@
-package com.nbe.automation.pages.Youtube;
+package com.nbe.automation.pages.youtube;
 
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.PageFactory;
 
-import com.nbe.automation.core.utils.AppiumUtils;
-import com.nbe.automation.core.utils.Locators;
-import com.nbe.automation.core.utils.LoggerUtil;
+import com.nbe.automation.base.BasePage;
+import com.nbe.automation.utils.Locators;
+import com.nbe.automation.utils.LoggerUtil;
 
+import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
 import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
 public class ChannelPage {
-    private final AppiumUtils appiumUtils;
+    private final BasePage appiumUtils;
 
-    public ChannelPage(AndroidDriver driver, AppiumUtils appiumUtils) {
+    private AndroidDriver driver;
+    public ChannelPage(AndroidDriver driver, BasePage appiumUtils) {
+        this.driver=driver;
         this.appiumUtils = appiumUtils;
         PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
@@ -54,8 +57,18 @@ public class ChannelPage {
             return isVideoVisible;
 
         } catch (Exception e) {
-            LoggerUtil.error("Error clicking on first playable video: " + e.getMessage(), e);
+            LoggerUtil.error("Error clicking on first playable video: " + e.getMessage(), e, this.getClass());
             return false;
+        }
+    }
+
+    public void goBackToHomePage()
+    {
+        try {
+            LoggerUtil.info("Going back to HomePage", getClass());
+            driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"Home\").instance(1)")).click();
+        } catch (Exception e) {
+            LoggerUtil.error("Error going back to HomePage: " + e.getMessage(), e, this.getClass());
         }
     }
 }

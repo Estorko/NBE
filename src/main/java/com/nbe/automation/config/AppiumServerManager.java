@@ -1,18 +1,22 @@
 package com.nbe.automation.config;
 
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import com.nbe.automation.core.utils.LoggerUtil;
+import com.nbe.automation.utils.LoggerUtil;
 
-@Component
 public class AppiumServerManager {
 
     public void startAppiumServer(int port, int bootstrapPort, int chromePort) {
+        if(isAppiumServerRunning(port))
+        {
+            LoggerUtil.info(String.format("Appium server is already running on port [%s]. Skipping start.", port),
+                    this.getClass());
+            return;
+        }
         String command = String.format(
                 "appium -p %d --base-path /wd/hub --default-capabilities \"{\\\"systemPort\\\":%d,\\\"chromeDriverPort\\\":%d}\"",
                 port, bootstrapPort, chromePort);

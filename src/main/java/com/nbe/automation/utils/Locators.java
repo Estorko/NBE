@@ -1,4 +1,4 @@
-package com.nbe.automation.core.utils;
+package com.nbe.automation.utils;
 
 public class Locators {
     // ToDo: move to pages to follow P-O-M model

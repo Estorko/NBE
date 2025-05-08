@@ -6,27 +6,35 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
-import org.springframework.stereotype.Component;
 
-import com.nbe.automation.core.utils.LoggerUtil;
+import com.nbe.automation.utils.LoggerUtil;
 
 import io.appium.java_client.android.AndroidDriver;
-import jakarta.annotation.PreDestroy;
 import lombok.Getter;
 
-@Component
 @Getter
 public class DriverFactory {
 
-    private final Map<String, AndroidDriver> drivers = new ConcurrentHashMap<>();
+    private static final Map<String, AndroidDriver> drivers = new ConcurrentHashMap<>();
     private final AppProperties appProperties;
 
     public DriverFactory(AppProperties appProperties) {
         this.appProperties = appProperties;
     }
 
+    static {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            quitAll();
+        }));
+    }
+
     public AndroidDriver createDriver(String deviceName, String udid, String serverUrl,
             int systemPort, int chromePort) {
+        AndroidDriver driver = drivers.get(udid);
+        if (driver != null) {
+            LoggerUtil.info("Driver already exists for UDID: " + udid, this.getClass());
+            return driver;
+        }
         try {
             LoggerUtil.info("Creating driver for device: " + deviceName, this.getClass());
             DesiredCapabilities caps = new DesiredCapabilities();
@@ -47,14 +55,14 @@ public class DriverFactory {
             caps.setCapability("appium:systemPort", systemPort);
             caps.setCapability("appium:chromeDriverPort", chromePort);
 
-            AndroidDriver driver = new AndroidDriver(new URI(serverUrl).toURL(), caps);
+            driver = new AndroidDriver(new URI(serverUrl).toURL(), caps);
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
             LoggerUtil.info(String.format("Driver created successfully for [%s]", udid), this.getClass());
             drivers.put(udid, driver);
-            return driver;
         } catch (Exception e) {
             throw new RuntimeException("Failed to initialize driver", e);
         }
+        return driver;
     }
 
     public AndroidDriver getDriver(String udid) {
@@ -65,14 +73,12 @@ public class DriverFactory {
         return driver;
     }
 
-
-    @PreDestroy
-    public void quitAll() {
+    public static void quitAll() {
         drivers.values().forEach(driver -> {
             try {
                 driver.quit();
             } catch (Exception e) {
-                LoggerUtil.warn("Error quitting driver: " + e.getMessage(), this.getClass());
+                LoggerUtil.warn("Error quitting driver: " + e.getMessage(), DriverFactory.class);
             }
         });
     }
