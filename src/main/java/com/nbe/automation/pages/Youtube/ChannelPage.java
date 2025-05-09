@@ -1,32 +1,33 @@
 package com.nbe.automation.pages.youtube;
 
+import java.util.regex.Pattern;
+
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.support.PageFactory;
 
 import com.nbe.automation.base.BasePage;
-import com.nbe.automation.utils.Locators;
 import com.nbe.automation.utils.LoggerUtil;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
 
-public class ChannelPage {
-    private final BasePage appiumUtils;
+public class ChannelPage extends BasePage {
 
-    private AndroidDriver driver;
-    public ChannelPage(AndroidDriver driver, BasePage appiumUtils) {
-        this.driver=driver;
-        this.appiumUtils = appiumUtils;
-        PageFactory.initElements(new AppiumFieldDecorator(driver), this);
+    private final By homeButton = AppiumBy.androidUIAutomator("new UiSelector().description(\"Home\").instance(1)");
+    private final By videosTab = AppiumBy
+            .androidUIAutomator("new UiSelector().textMatches(\"(?i)^" + Pattern.quote("Videos") + "$\")");
+    private final By videoPlayView = AppiumBy.id("com.google.android.youtube:id/watch_while_time_bar_view_overlay");
+    private final By videoPartialContentDesc = AppiumBy.accessibilityId("- play video");
+    private final By searchResultRecyclerView = AppiumBy.id("com.google.android.youtube:id/results");
+
+    public ChannelPage(AndroidDriver driver) {
+        super(driver);
     }
 
     public void clickOnVideosTab() {
         try {
             LoggerUtil.info("Clicking on videos tab", this.getClass());
-            appiumUtils.scrollToElementByText(Locators.YOUTUBE_CHANNEL_VIDEOS_TAB);
-            // appiumUtils.waitForElementByText(Locators.YOUTUBE_CHANNEL_VIDEOS_TAB, 10);
-            appiumUtils.clickByText(Locators.YOUTUBE_CHANNEL_VIDEOS_TAB);
+            find(videosTab).click();
             LoggerUtil.info("Clicked on videos tab successfully", this.getClass());
         } catch (Exception e) {
             LoggerUtil.error(String.format("Error clicking on videos tab: %s", e.getMessage()), e, this.getClass());
@@ -37,11 +38,10 @@ public class ChannelPage {
     public boolean clickOnFirstVideo() {
         try {
             LoggerUtil.debug("Clicking on first video with content-desc containing '- play video'", this.getClass());
-            appiumUtils.scrollDown();
+            scrollDown();
             Thread.sleep(1000);
-            final WebElement recyclerView = appiumUtils.findById(Locators.YOUTUBE_SEARCH_RESULT_RECYCLER_VIEW);
-            WebElement playableVideo = appiumUtils.findByContentDescContainingWithXPath(recyclerView,
-                    Locators.YOUTUBE_CHANNEL_VIDEO_VIEW_CONTENT_DESC);
+            final WebElement recyclerView = find(searchResultRecyclerView);
+            WebElement playableVideo = findByPartialContentDesc(videoPartialContentDesc, recyclerView);
             if (playableVideo == null) {
                 LoggerUtil.warn("No video element with matching content-desc were found.", this.getClass());
                 return false;
@@ -50,7 +50,7 @@ public class ChannelPage {
                     .info("Clicking on element with content-desc: " + playableVideo.getAttribute("content-desc"),
                             this.getClass());
             playableVideo.click();
-            boolean isVideoVisible = appiumUtils.waitForElementById(Locators.YOUTUBE_VIDEO_PLAY_VIEW_ID, 10);
+            boolean isVideoVisible = waitForElement(videoPlayView, 10);
             LoggerUtil.info(isVideoVisible
                     ? "Video playback screen is visible after clicking."
                     : "Video playback screen is NOT visible after clicking.", this.getClass());
@@ -62,11 +62,9 @@ public class ChannelPage {
         }
     }
 
-    public void goBackToHomePage()
-    {
+    public void goBackToHomePage() {
         try {
-            LoggerUtil.info("Going back to HomePage", getClass());
-            driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"Home\").instance(1)")).click();
+            find(homeButton).click();
         } catch (Exception e) {
             LoggerUtil.error("Error going back to HomePage: " + e.getMessage(), e, this.getClass());
         }

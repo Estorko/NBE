@@ -1,6 +1,9 @@
 package com.nbe.automation.tests;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.TestInstance;
@@ -9,7 +12,6 @@ import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import com.nbe.automation.base.BasePage;
 import com.nbe.automation.pages.youtube.ChannelPage;
 import com.nbe.automation.pages.youtube.HomePage;
 import com.nbe.automation.pages.youtube.SearchResultsPage;
@@ -22,22 +24,20 @@ import io.appium.java_client.android.AndroidDriver;
 class YoutubeParallelTest2 extends BaseTest {
 
     private static final String CHANNEL_NAME = "NBE";
-    private ChannelPage channelPage;
 
     @Execution(ExecutionMode.CONCURRENT)
     @ParameterizedTest(name = "Device {0}")
     @MethodSource("udidsProvider")
     void fullYoutubeTestSequence(String udid) throws Exception {
+        LoggerUtil.info(String.format(">>> Running tests for: [%s]", udid), this.getClass());
         AndroidDriver driver = driverFactory.getDriver(udid);
-        HomePage homePage = new HomePage(driver, new BasePage(driver));
-        SearchResultsPage searchResultsPage = new SearchResultsPage(driver, new BasePage(driver));
-        channelPage = new ChannelPage(driver, new BasePage(driver));
+        HomePage homePage = new HomePage(driver);
+        SearchResultsPage searchResultsPage = new SearchResultsPage(driver);
+        ChannelPage channelPage = new ChannelPage(driver);
         executeOrderedSteps(udid, homePage, searchResultsPage, channelPage);
     }
 
-    private void executeOrderedSteps(String udid,
-            HomePage homePage,
-            SearchResultsPage searchResultsPage,
+    private void executeOrderedSteps(String udid, HomePage homePage, SearchResultsPage searchResultsPage,
             ChannelPage channelPage) throws Exception {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         try {
@@ -64,6 +64,7 @@ class YoutubeParallelTest2 extends BaseTest {
                 }
                 LoggerUtil.info(String.format("[%s] Starting video test", udid), this.getClass());
                 channelPage.clickOnVideosTab();
+                LoggerUtil.info(String.format("[%s] Going back to Hompage", udid), this.getClass());
                 channelPage.goBackToHomePage();
                 // Assertions.assertTrue(channelPage.clickOnFirstVideo(),
                 // String.format("[%s] Video playback failed", udid));

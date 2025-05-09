@@ -1,9 +1,11 @@
 package com.nbe.automation.tests.base;
 
-import java.util.concurrent.*;
+import java.util.List;
+import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 
@@ -18,7 +20,6 @@ import com.nbe.automation.utils.LoggerUtil;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class BaseTest {
 
-    private static boolean cleanupDone = false;
     protected static TestLauncher testLauncher;
     protected static DriverFactory driverFactory;
     protected static AppiumServerManager appiumServerManager;
@@ -26,7 +27,9 @@ public abstract class BaseTest {
     protected static CountDownLatch latch;
 
     static Stream<String> udidsProvider() {
-        return TestLauncher.getAssignedUdids().stream();
+        List<String> udids = TestLauncher.getAssignedUdids();
+        LoggerUtil.info("UDIDs provided to test: " + udids, BaseTest.class);
+        return udids.stream();
     }
 
     @BeforeAll
@@ -37,21 +40,11 @@ public abstract class BaseTest {
         appiumServerManager = new AppiumServerManager();
         testLauncher = new TestLauncher(emulatorManager, appiumServerManager, driverFactory, appProperties);
 
-        LoggerUtil.info("GLOBAL SETUP", BaseTest.class);
+        LoggerUtil.info("-> STARTING GLOBAL SETUP <-", BaseTest.class);
         testLauncher.startAll();
         testLauncher.waitForDrivers(60000);
         latch = new CountDownLatch(1);
     }
-
-    // @AfterAll
-    // static void globalTeardown() {
-    //     if (!cleanupDone) {
-    //         LoggerUtil.info("Shutting down all resources", BaseTest.class);
-    //         appiumServerManager.killAllAppiumServers();
-    //         emulatorManager.killAllEmulators();
-    //         cleanupDone = true;
-    //     }
-    // }
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

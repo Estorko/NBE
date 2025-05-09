@@ -31,10 +31,6 @@ public class AppProperties {
         return properties.getProperty("appium.autoGrantPermissions");
     }
 
-    public String getDeviceName() {
-        return properties.getProperty("appium.deviceName");
-    }
-
     public String getNewCommandTimeout() {
         return properties.getProperty("appium.newCommandTimeout");
     }
@@ -51,28 +47,8 @@ public class AppProperties {
         return properties.getProperty("appium.serverURL");
     }
 
-    public String getUdid() {
-        return properties.getProperty("appium.udid");
-    }
-
     public String getEmulatorNames() {
         return properties.getProperty("emulator.names");
-    }
-
-    public String getNbeAppActivity() {
-        return properties.getProperty("nbe.appium.appActivity");
-    }
-
-    public String getNbeAppPackage() {
-        return properties.getProperty("nbe.appium.appPackage");
-    }
-
-    public String getNbeUserId() {
-        return properties.getProperty("nbe.user.id");
-    }
-
-    public String getNbeUserPassword() {
-        return properties.getProperty("nbe.user.password");
     }
 
     public String getYoutubeAppActivity() {

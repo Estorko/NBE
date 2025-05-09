@@ -23,9 +23,7 @@ public class DriverFactory {
     }
 
     static {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            quitAll();
-        }));
+        Runtime.getRuntime().addShutdownHook(new Thread(DriverFactory::quitAll));
     }
 
     public AndroidDriver createDriver(String deviceName, String udid, String serverUrl,
@@ -48,9 +46,6 @@ public class DriverFactory {
             caps.setCapability("newCommandTimeout", appProperties.getNewCommandTimeout());
             caps.setCapability("autoGrantPermissions", appProperties.getAutoGrantPermissions());
             caps.setCapability("ignoreUnimportantViews", true);
-            caps.setCapability("enforceXPath1", true);
-            caps.setCapability("ignoreHiddenApiPolicyError", true);
-
             caps.setCapability("appWaitActivity", String.format("%s.*", appProperties.getYoutubeAppPackage()));
             caps.setCapability("appium:systemPort", systemPort);
             caps.setCapability("appium:chromeDriverPort", chromePort);

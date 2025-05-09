@@ -24,40 +24,55 @@ public class EmulatorManager {
         }
 
         String androidHome = System.getenv(appProperties.getAndroidHomeEnv());
+        File emulatorDir = new File(androidHome, "emulator");
+        // Use full path to emulator.exe
+        File emulatorExecutable = new File(emulatorDir, "emulator.exe");
+
         if (androidHome == null || androidHome.isBlank()) {
             throw new IllegalStateException("ANDROID_HOME environment variable is not set.");
         }
 
-        File emulatorDir = new File(androidHome, "emulator");
         if (!emulatorDir.exists()) {
             throw new IllegalStateException(
                     "Emulator directory not found in ANDROID_HOME: " + emulatorDir.getAbsolutePath());
         }
 
-        // Use full path to emulator.exe
-        File emulatorExecutable = new File(emulatorDir, "emulator.exe");
         if (!emulatorExecutable.exists()) {
             throw new IllegalStateException("Emulator executable not found: " + emulatorExecutable.getAbsolutePath());
         }
 
-        ProcessBuilder pb = new ProcessBuilder(
-                emulatorExecutable.getAbsolutePath(),
-                "-avd", avdName,
-                "-port", String.valueOf(port),
-                "-no-snapshot-save",
-                "-no-audio",
-                "-no-boot-anim",
-                "-no-snapshot-load"
-                // "-no-window",
-                );
+        try {
+            ProcessBuilder pb = new ProcessBuilder(
+                    emulatorExecutable.getAbsolutePath(),
+                    "-avd", avdName,
+                    "-port", String.valueOf(port),
+                    "-no-snapshot-save",
+                    "-no-audio",
+                    "-no-boot-anim",
+                    "-no-snapshot-load"
+            // "-no-window",
+            );
 
-        pb.directory(emulatorDir);
-        File outputFile = new File("logs/emulatorsLog.log");
-        pb.redirectOutput(outputFile);
-        pb.redirectError(outputFile);
-        LoggerUtil.info(String.format("Starting emulator [%s] on port [%s] from '%s'", avdName, port,
-                emulatorExecutable.getAbsolutePath()), this.getClass());
-        pb.start();
+            pb.directory(emulatorDir);
+            File outputFile = new File("logs/emulatorsLog.log");
+            pb.redirectOutput(outputFile);
+            pb.redirectError(outputFile);
+            LoggerUtil.info(String.format("Starting emulator [%s] on port [%s] from '%s'", avdName, port,
+                    emulatorExecutable.getAbsolutePath()), this.getClass());
+            pb.start();
+
+            boolean online = waitForDeviceOnline(udid, 60000);
+            if (!online) {
+                throw new RuntimeException("Device " + udid + " did not appear in adb.");
+            }
+            boolean booted = waitForBootCompletion(udid, 60000);
+            if (!booted) {
+                throw new RuntimeException("Device " + udid + " did not complete boot.");
+            }
+        } catch (Exception e) {
+            LoggerUtil.error(String.format("Failed to start Emulator [%s] ", udid), e, this.getClass());
+            throw new RuntimeException(e);
+        }
     }
 
     public boolean waitForBootCompletion(String emulatorId, long timeoutMillis) {

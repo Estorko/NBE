@@ -1,6 +1,5 @@
 package com.nbe.automation.config;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -11,8 +10,7 @@ import com.nbe.automation.utils.LoggerUtil;
 public class AppiumServerManager {
 
     public void startAppiumServer(int port, int bootstrapPort, int chromePort) {
-        if(isAppiumServerRunning(port))
-        {
+        if (isAppiumServerRunning(port)) {
             LoggerUtil.info(String.format("Appium server is already running on port [%s]. Skipping start.", port),
                     this.getClass());
             return;
@@ -84,7 +82,7 @@ public class AppiumServerManager {
         throw new RuntimeException(String.format("Timed out waiting for Appium server on port [%s]", port));
     }
 
-    //not working - needs fixing
+    // not working - needs fixing
     public void killAppiumServerByPort(String port) {
         LoggerUtil.info("Shutting down Appium server for port: " + port, this.getClass());
         try {

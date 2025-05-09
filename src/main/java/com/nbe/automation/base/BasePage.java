@@ -3,198 +3,64 @@ package com.nbe.automation.base;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
+import java.util.function.Function;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.interactions.PointerInput;
 import org.openqa.selenium.interactions.Sequence;
-import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.nbe.automation.utils.LoggerUtil;
 
 import io.appium.java_client.AppiumBy;
 import io.appium.java_client.android.AndroidDriver;
-import io.appium.java_client.pagefactory.AppiumFieldDecorator;
+import io.appium.java_client.android.nativekey.AndroidKey;
+import io.appium.java_client.android.nativekey.KeyEvent;
 
 public class BasePage {
     private final AndroidDriver driver;
 
     public BasePage(AndroidDriver driver) {
         this.driver = driver;
-        PageFactory.initElements(new AppiumFieldDecorator(driver), this);
     }
 
     public WebElement find(By locator) {
-        LoggerUtil.debug("Finding element by Accessibility ID: " + locator.toString(), this.getClass());
-        return driver.findElement(locator);
+        LoggerUtil.debug("Finding element : " + locator.toString(), this.getClass());
+        return new WebDriverWait(driver, Duration.ofSeconds(20))
+                .until(ExpectedConditions.elementToBeClickable(locator));
     }
 
-    public WebElement findById(String id) {
-        LoggerUtil.debug("Finding element by ID: " + id, this.getClass());
-        return driver.findElement(AppiumBy.androidUIAutomator("new UiSelector().resourceId(\"" + id + "\")"));
-    }
-
-    public WebElement findByAccessibilityId(String accessibilityId) {
-        LoggerUtil.debug("Finding element by Accessibility ID: " + accessibilityId, this.getClass());
-        return driver
-                .findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"" + accessibilityId + "\")"));
-    }
-
-    public WebElement findByXPath(String xpath) {
-        LoggerUtil.debug("Finding element by XPath: " + xpath, this.getClass());
-        return driver.findElement(AppiumBy.xpath(xpath));
-    }
-
-    public WebElement findByText(String text) {
-        LoggerUtil.debug("Finding element by text (case-insensitive): " + text, this.getClass());
-        return driver.findElement(
-                AppiumBy.androidUIAutomator("new UiSelector().textMatches(\"(?i)^" + Pattern.quote(text) + "$\")"));
-    }
-
-    public void clickById(String id) {
-        LoggerUtil.debug("Clicking element by ID: " + id, this.getClass());
-        findById(id).click();
-    }
-
-    public void clickByAccessibilityId(String accessibilityId) {
-        LoggerUtil.debug("Clicking element by Accessibility ID: " + accessibilityId, this.getClass());
-        findByAccessibilityId(accessibilityId).click();
-    }
-
-    public void clickByText(String text) {
-        LoggerUtil.debug("Clicking element by text: " + text, this.getClass());
-        findByText(text).click();
-    }
-
-    public void sendKeysById(String id, String text) {
-        LoggerUtil.debug("Sending keys to element by ID: " + id, this.getClass());
-        WebElement element = findById(id);
+    public void set(By locater, String text) {
+        LoggerUtil.debug(String.format("Sending keys '%s' to locator %s ", text, locater.toString()), this.getClass());
+        WebElement element = find(locater);
         element.clear();
         element.sendKeys(text);
     }
 
-    public void sendKeysByAccessibilityId(String accessibilityId, String text) {
-        LoggerUtil.debug("Sending keys to element by Accessibility ID: " + accessibilityId, this.getClass());
-        WebElement element = findByAccessibilityId(accessibilityId);
-        element.clear();
-        element.sendKeys(text);
+    public void enter() {
+        driver.pressKey(new KeyEvent(AndroidKey.ENTER));
+        new WebDriverWait(driver, Duration.ofSeconds(10))
+                .until((Function<WebDriver, Boolean>) d -> {
+                    try {
+                        return !((AndroidDriver) d).isKeyboardShown();
+                    } catch (Exception e) {
+                        return true;
+                    }
+                });
     }
 
-    public void sendKeysByText(String text, String value) {
-        LoggerUtil.debug("Sending keys to element by text: " + text, this.getClass());
-        WebElement element = findByText(text);
-        element.clear();
-        element.sendKeys(value);
-    }
-
-    public void sendKeysByClass(String className, String text, int index) {
-        LoggerUtil.debug("Sending keys to element by class: " + className + " at index: " + index, this.getClass());
-        List<WebElement> elements = driver
-                .findElements(AppiumBy.androidUIAutomator("new UiSelector().className(\"" + className + "\")"));
-        if (!elements.isEmpty()) {
-            elements.get(index).clear();
-            elements.get(index).sendKeys(text);
-        } else {
-            LoggerUtil.warn("No elements found with class: " + className, this.getClass());
-        }
-    }
-
-    public void sendKeysByXPath(String xpath, String text) {
+    public boolean isDisplayed(By locator) {
         try {
-            LoggerUtil.debug("Sending keys to element by XPath: " + xpath, this.getClass());
-            // Extract resource-id from XPath
-            String resourceId = xpath.replaceAll(".*@resource-id='([^']*)'.*", "$1");
-            WebElement element = findById(resourceId);
-            element.clear();
-            element.sendKeys(text);
-            LoggerUtil.debug("Successfully sent keys to element", this.getClass());
+            LoggerUtil.debug("Checking visibility of element with locator: " + locator, this.getClass());
+            return driver.findElement(locator).isDisplayed();
+
         } catch (Exception e) {
-            LoggerUtil.error("Error sending keys to element by XPath: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to send keys to element by XPath: " + xpath, e);
-        }
-    }
-
-    public String getTextById(String id) {
-        LoggerUtil.debug("Getting text from element by ID: " + id, this.getClass());
-        return findById(id).getText();
-    }
-
-    public String getTextByAccessibilityId(String accessibilityId) {
-        LoggerUtil.debug("Getting text from element by Accessibility ID: " + accessibilityId, this.getClass());
-        return findByAccessibilityId(accessibilityId).getText();
-    }
-
-    public boolean isDisplayedById(String id) {
-        try {
-            LoggerUtil.debug("Checking visibility of element by ID: " + id, this.getClass());
-            return findById(id).isDisplayed();
-        } catch (Exception e) {
-            LoggerUtil.warn("Element not found by ID: " + id, this.getClass());
+            LoggerUtil.warn("Element not found for locator: " + locator, this.getClass());
             return false;
-        }
-    }
-
-    public boolean isDisplayedByAccessibilityId(String accessibilityId) {
-        try {
-            LoggerUtil.debug("Checking visibility of element by Accessibility ID: " + accessibilityId, this.getClass());
-            WebElement element = findByAccessibilityId(accessibilityId);
-            return element.isDisplayed();
-        } catch (Exception e) {
-            LoggerUtil.warn("Element not found by Accessibility ID: " + accessibilityId, this.getClass());
-            return false;
-        }
-    }
-
-    public boolean isDisplayedByText(String text) {
-        try {
-            LoggerUtil.debug("Checking visibility of element by text: " + text, this.getClass());
-            return findByText(text).isDisplayed();
-        } catch (Exception e) {
-            LoggerUtil.warn("Element not found by text: " + text, this.getClass());
-            return false;
-        }
-    }
-
-    public String getTextByText(String text) {
-        try {
-            LoggerUtil.debug("Getting text from element by text: " + text, this.getClass());
-            return findByText(text).getText();
-        } catch (Exception e) {
-            LoggerUtil.error("Error getting text from element by text: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to get text from element with text: " + text, e);
-        }
-    }
-
-    public WebElement findByClassNameAndInstance(String className, int instance) {
-        try {
-            LoggerUtil.debug("Finding element by class name: " + className + " and instance: " + instance,
-                    this.getClass());
-            return driver.findElement(AppiumBy.androidUIAutomator(
-                    "new UiSelector().className(\"" + className + "\").instance(" + instance + ")"));
-        } catch (Exception e) {
-            LoggerUtil.error("Error finding element by class name and instance: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to find element with class: " + className + " and instance: " + instance,
-                    e);
-        }
-    }
-
-    public String getTextFromChildIndex(String className, int parentInstance, int childIndex) {
-        try {
-            LoggerUtil.debug("Getting text from child index " + childIndex + " of element with class: " + className
-                    + " and instance: " + parentInstance, this.getClass());
-            WebElement parent = findByClassNameAndInstance(className, parentInstance);
-            List<WebElement> children = parent.findElements(
-                    AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.TextView\")"));
-            if (children.size() > childIndex) {
-                return children.get(childIndex).getText();
-            }
-            throw new RuntimeException("Child index " + childIndex + " not found");
-        } catch (Exception e) {
-            LoggerUtil.error("Error getting text from child index: " + e.getMessage(), e);
-            throw new RuntimeException("Failed to get text from child index " + childIndex, e);
         }
     }
 
@@ -258,138 +124,145 @@ public class BasePage {
         }
     }
 
+    public WebElement findByPartialContentDesc(By locator, WebElement parent) {
+        LoggerUtil.debug("Finding element within parent using partial content-desc via locator: " + locator,
+                getClass());
+        String value = extractLocatorValue(locator.toString()).toLowerCase();
+        String xpath = ".//*[@content-desc and contains(translate(@content-desc, " +
+                "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" + value + "')]";
+
+        return parent.findElement(By.xpath(xpath));
+    }
+
+    public void scrollToElement(By locator) {
+        LoggerUtil.debug("Attempting to scroll to element: " + locator, this.getClass());
+        try {
+            // if (isDisplayed(locator)) {
+            //     LoggerUtil.debug("Element is already visible, no need to scroll", this.getClass());
+            //     return;
+            // }
+            String uiScrollable = "new UiScrollable(new UiSelector().scrollable(true))"
+                    + ".setAsVerticalList()"
+                    + ".scrollForward()";
+            if (locator instanceof AppiumBy.ByAccessibilityId) {
+                String accessibilityId = extractLocatorValue(locator.toString());
+                LoggerUtil.info("Scrolling to element with AccessibilityId: " + accessibilityId, getClass());
+                uiScrollable += ".scrollIntoView(new UiSelector().description(\"" + accessibilityId + "\"))";
+            } else if (locator instanceof AppiumBy.ById) {
+                String resourceId = extractLocatorValue(locator.toString());
+                LoggerUtil.info("Scrolling to element with ResourceId: " + resourceId, getClass());
+                uiScrollable += ".scrollIntoView(new UiSelector().resourceId(\"" + resourceId + "\"))";
+            } else if (locator instanceof AppiumBy.ByAndroidUIAutomator) {
+                String text = extractLocatorValue(locator.toString());
+                LoggerUtil.info("Scrolling by text: " + text, getClass());
+                uiScrollable += ".scrollIntoView(new UiSelector().text(\"" + text + "\"))";
+            } else if (locator instanceof By.ByXPath) {
+                String xpath = extractLocatorValue(locator.toString());
+                LoggerUtil.info("Scrolling by XPath: " + xpath, getClass());
+                uiScrollable += ".scrollIntoView(new UiSelector().xpath(\"" + xpath + "\"))";
+            } else if (locator instanceof AppiumBy.ByClassName) {
+                String className = extractLocatorValue(locator.toString());
+                LoggerUtil.info("Scrolling by ClassName: " + className, getClass());
+                uiScrollable += ".scrollIntoView(new UiSelector().className(\"" + className + "\"))";
+            } else {
+                // Fallback scroll using swipe (up to 5 times) if locator is not recognized
+                int maxScrolls = 5;
+                boolean found = false;
+
+                for (int i = 0; i < maxScrolls; i++) {
+                    if (isDisplayed(locator)) {
+                        found = true;
+                        break;
+                    }
+                    scrollDown();
+                }
+
+                if (!found) {
+                    throw new RuntimeException("Element not found after scrolling.");
+                }
+                return;
+            }
+            driver.findElement(AppiumBy.androidUIAutomator(uiScrollable));
+            LoggerUtil.debug("Successfully scrolled to element: " + locator, this.getClass());
+
+        } catch (Exception e) {
+            LoggerUtil.error("Failed to scroll to element: " + locator, e, this.getClass());
+            throw new RuntimeException("Scroll failed: " + e.getMessage(), e);
+        }
+    }
+
+    private String extractLocatorValue(String locatorString) {
+        if (locatorString.contains(": ")) {
+            return locatorString.substring(locatorString.indexOf(": ") + 2);
+        }
+        return locatorString;
+    }
+
+    public boolean waitForElement(By locator, int timeoutInSeconds) {
+        try {
+            LoggerUtil.debug("Waiting for interactable element: " + locator, this.getClass());
+
+            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
+            WebElement element = wait.until(driver1 -> {
+                try {
+                    WebElement foundElement = driver.findElement(locator);
+                    return (foundElement.isDisplayed() && foundElement.isEnabled()) ? foundElement : null;
+                } catch (Exception e) {
+                    return null;
+                }
+            });
+
+            boolean isVisible = element != null;
+            LoggerUtil.debug(isVisible
+                    ? "Element is interactable: " + locator
+                    : "Element not found or not interactable: " + locator, this.getClass());
+            return isVisible;
+
+        } catch (TimeoutException e) {
+            LoggerUtil.error("Timeout: Element not interactable: " + locator, e, this.getClass());
+            return false;
+        } catch (Exception e) {
+            LoggerUtil.error("Unexpected error waiting for element: " + locator, e, this.getClass());
+            return false;
+        }
+    }
+
+    // Todo: refactor for locators instead
+    public String getTextFromChildIndex(String className, int parentInstance, int childIndex) {
+        try {
+            LoggerUtil.debug("Getting text from child index " + childIndex + " of element with class: " + className
+                    + " and instance: " + parentInstance, this.getClass());
+            WebElement parent = findByClassNameAndInstance(className, parentInstance);
+            List<WebElement> children = parent.findElements(
+                    AppiumBy.androidUIAutomator("new UiSelector().className(\"android.widget.TextView\")"));
+            if (children.size() > childIndex) {
+                return children.get(childIndex).getText();
+            }
+            throw new RuntimeException("Child index " + childIndex + " not found");
+        } catch (Exception e) {
+            LoggerUtil.error("Error getting text from child index: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to get text from child index " + childIndex, e);
+        }
+    }
+
+    // Todo: refactor for locators instead
     public WebElement findByAccessibilityIdWithinParent(WebElement parent, String accessibilityId) {
         LoggerUtil.debug("Finding element by Accessibility ID within parent: " + accessibilityId, this.getClass());
         return parent
                 .findElement(AppiumBy.androidUIAutomator("new UiSelector().description(\"" + accessibilityId + "\")"));
     }
 
-    public WebElement findByContentDescContainingWithXPath(WebElement parent, String partialContentDesc) {
-        LoggerUtil.debug(
-                "Finding element within parent by partial (case-insensitive) content-desc: " + partialContentDesc,
-                this.getClass());
-        String lowered = partialContentDesc.toLowerCase();
-        String xpath = ".//*[@content-desc and contains(translate(@content-desc, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '"
-                + lowered + "')]";
-        return parent.findElement(AppiumBy.xpath(xpath));
-    }
-
-    public void scrollToElementByAccessibilityId(String accessibilityId) {
-        LoggerUtil.debug("Scrolling down to element by accessibility ID: " + accessibilityId, this.getClass());
+    // Todo: refactor for locators instead
+    public WebElement findByClassNameAndInstance(String className, int instance) {
         try {
-            String uiScrollable = "new UiScrollable(new UiSelector().scrollable(true))"
-                    + ".setAsVerticalList()"
-                    + ".scrollForward()" // scroll forward (down)
-                    + ".scrollIntoView(new UiSelector().description(\"" + accessibilityId + "\"))";
-            driver.findElement(AppiumBy.androidUIAutomator(uiScrollable));
-            LoggerUtil.debug("Scrolled to element with accessibility ID: " + accessibilityId, this.getClass());
-        } catch (Exception e) {
-            LoggerUtil.error("Failed to scroll to element by accessibility ID: " + accessibilityId, e);
-            throw new RuntimeException("Scroll failed: " + e.getMessage(), e);
-        }
-    }
-
-    public void scrollToElementByText(String text) {
-        LoggerUtil.debug("Scrolling down to element by text: " + text, this.getClass());
-        if (isDisplayedByText(text)) {
-            LoggerUtil.debug("Element is already visible, no need to scroll", this.getClass());
-            return;
-        } else {
-            try {
-                String uiScrollable = "new UiScrollable(new UiSelector().scrollable(true))"
-                        + ".setAsVerticalList()"
-                        + ".scrollForward()" // Scroll forward (down)
-                        + ".scrollIntoView(new UiSelector().text(\"" + text + "\"))";
-                driver.findElement(AppiumBy.androidUIAutomator(uiScrollable));
-                LoggerUtil.debug("Scrolled to element with text: " + text, this.getClass());
-            } catch (Exception e) {
-                LoggerUtil.error("Failed to scroll to element by text: " + text, e);
-                throw new RuntimeException("Scroll failed: " + e.getMessage(), e);
-            }
-        }
-    }
-
-    public boolean waitForElementByText(String text, int timeoutInSeconds) {
-        try {
-            LoggerUtil.debug("Waiting for interactable element with text: " + text, this.getClass());
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-            WebElement element = wait.until(activeDriver -> {
-                try {
-                    WebElement foundElement = findByText(text);
-                    return (foundElement.isDisplayed() && foundElement.isEnabled()) ? foundElement : null;
-                } catch (Exception e) {
-                    return null;
-                }
-            });
-
-            boolean isVisible = element != null; // true if element is found and visible
-            LoggerUtil.debug(isVisible
-                    ? "Element with text is interactable: " + text
-                    : "Element with text not found or not interactable: " + text, this.getClass());
-            return isVisible;
-        } catch (TimeoutException e) {
-            LoggerUtil.error("Timeout: Element with text not interactable: " + text, e);
-            return false; // return false if timeout occurs
-        } catch (Exception e) {
-            LoggerUtil.error("Unexpected error waiting for element with text: " + text, e);
-            return false;
-        }
-    }
-
-    public boolean waitForElementByAccessibilityId(String accessibilityId, int timeoutInSeconds) {
-        try {
-            LoggerUtil.debug("Waiting for interactable element with Accessibility ID: " + accessibilityId,
+            LoggerUtil.debug("Finding element by class name: " + className + " and instance: " + instance,
                     this.getClass());
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-            WebElement element = wait.until(activeDriver -> {
-                try {
-                    WebElement foundElement = findByAccessibilityId(accessibilityId);
-                    return (foundElement.isDisplayed() && foundElement.isEnabled()) ? foundElement : null;
-                } catch (Exception e) {
-                    return null;
-                }
-            });
-
-            boolean isVisible = element != null;
-            LoggerUtil.debug(isVisible
-                    ? "Element is interactable with Accessibility ID: " + accessibilityId
-                    : "Element not found or not interactable with Accessibility ID: " + accessibilityId,
-                    this.getClass());
-            return isVisible;
-        } catch (TimeoutException e) {
-            LoggerUtil.error("Timeout: Element not interactable with Accessibility ID: " + accessibilityId, e);
-            return false;
+            return driver.findElement(AppiumBy.androidUIAutomator(
+                    "new UiSelector().className(\"" + className + "\").instance(" + instance + ")"));
         } catch (Exception e) {
-            LoggerUtil.error("Unexpected error waiting for element with Accessibility ID: " + accessibilityId, e);
-            return false;
-        }
-    }
-
-    public boolean waitForElementById(String resourceId, int timeoutInSeconds) {
-        try {
-            LoggerUtil.debug("Waiting for interactable element with Resource ID: " + resourceId, this.getClass());
-            WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(timeoutInSeconds));
-
-            WebElement element = wait.until(activeDriver -> {
-                try {
-                    WebElement foundElement = findById(resourceId);
-                    return (foundElement.isDisplayed() && foundElement.isEnabled()) ? foundElement : null;
-                } catch (Exception e) {
-                    return null;
-                }
-            });
-
-            boolean isVisible = element != null;
-            LoggerUtil.debug(isVisible
-                    ? "Element is interactable with Resource ID: " + resourceId
-                    : "Element not found or not interactable with Resource ID: " + resourceId, this.getClass());
-            return isVisible;
-        } catch (TimeoutException e) {
-            LoggerUtil.error("Timeout: Element not interactable with Resource ID: " + resourceId, e);
-            return false;
-        } catch (Exception e) {
-            LoggerUtil.error("Unexpected error waiting for element with Resource ID: " + resourceId, e);
-            return false;
+            LoggerUtil.error("Error finding element by class name and instance: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to find element with class: " + className + " and instance: " + instance,
+                    e);
         }
     }
 }
