@@ -23,7 +23,7 @@ import io.appium.java_client.android.AndroidDriver;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class YoutubeParallelTest3 extends BaseTest {
 
-    private static final String CHANNEL_NAME = "NBE";
+    private static final String CHANNEL_NAME = "Wegz";
 
     @Test
     void fullYoutubeTestSequence() throws Exception {
