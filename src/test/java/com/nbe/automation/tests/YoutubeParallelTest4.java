@@ -21,7 +21,7 @@ import io.appium.java_client.android.AndroidDriver;
 
 @Execution(ExecutionMode.CONCURRENT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class YoutubeParallelTest2 extends BaseTest {
+class YoutubeParallelTest4 extends BaseTest {
 
     private static final String CHANNEL_NAME = "NBE";
 

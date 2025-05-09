@@ -6,11 +6,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 
 import com.nbe.automation.pages.youtube.ChannelPage;
 import com.nbe.automation.pages.youtube.HomePage;
@@ -20,16 +19,19 @@ import com.nbe.automation.utils.LoggerUtil;
 
 import io.appium.java_client.android.AndroidDriver;
 
+@Execution(ExecutionMode.CONCURRENT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-class YoutubeParallelTest extends BaseTest {
+class YoutubeParallelTest6 extends BaseTest {
 
     private static final String CHANNEL_NAME = "NBE";
 
-    @Execution(ExecutionMode.CONCURRENT)
-    @ParameterizedTest(name = "Device {0}")
-    @MethodSource("udidsProvider")
-    void fullYoutubeTestSequence(String udid) throws Exception {
-        LoggerUtil.info(String.format(">>> Running tests for: [%s]", udid), this.getClass());
+    @Test
+    void fullYoutubeTestSequence() throws Exception {
+        if (isWaitingForUdid()) {
+            LoggerUtil.info("Waiting for an available emulator...", this.getClass());
+        }
+        String udid = acquireUdid();
+        LoggerUtil.info(String.format(">>> Acquired emulator: [%s] for running Test.", udid), this.getClass());
         AndroidDriver driver = driverFactory.getDriver(udid);
         HomePage homePage = new HomePage(driver);
         SearchResultsPage searchResultsPage = new SearchResultsPage(driver);
@@ -71,6 +73,7 @@ class YoutubeParallelTest extends BaseTest {
             });
             videoFuture.get();
         } finally {
+            releaseUdid(udid);
             executor.shutdown();
         }
     }

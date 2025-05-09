@@ -1,8 +1,6 @@
 package com.nbe.automation.tests.base;
 
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -25,25 +23,40 @@ public abstract class BaseTest {
     protected static AppiumServerManager appiumServerManager;
     protected static EmulatorManager emulatorManager;
     protected static CountDownLatch latch;
+    private static volatile boolean setupComplete = false;
 
-    static Stream<String> udidsProvider() {
-        List<String> udids = TestLauncher.getAssignedUdids();
-        LoggerUtil.info("UDIDs provided to test: " + udids, BaseTest.class);
-        return udids.stream();
+    protected static String acquireUdid() {
+        try {
+            return TestLauncher.acquireUdid();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Could not acquire Udid from Testlauncher");
+        }
+    }
+
+    protected static void releaseUdid(String udid) {
+        TestLauncher.registerAndReleaseUdid(udid);
+    }
+
+    protected boolean isWaitingForUdid() {
+        return TestLauncher.isWaitingForUdid();
+
     }
 
     @BeforeAll
-    static void globalSetup() {
-        AppProperties appProperties = new AppProperties();
-        driverFactory = new DriverFactory(appProperties);
-        emulatorManager = new EmulatorManager(appProperties);
-        appiumServerManager = new AppiumServerManager();
-        testLauncher = new TestLauncher(emulatorManager, appiumServerManager, driverFactory, appProperties);
+    static synchronized void globalSetup() {
+        if (!setupComplete) {
+            AppProperties appProperties = new AppProperties();
+            driverFactory = new DriverFactory(appProperties);
+            emulatorManager = new EmulatorManager(appProperties);
+            appiumServerManager = new AppiumServerManager();
+            testLauncher = new TestLauncher(emulatorManager, appiumServerManager, driverFactory, appProperties);
 
-        LoggerUtil.info("-> STARTING GLOBAL SETUP <-", BaseTest.class);
-        testLauncher.startAll();
-        testLauncher.waitForDrivers(60000);
-        latch = new CountDownLatch(1);
+            LoggerUtil.info("-> STARTING GLOBAL SETUP <-", BaseTest.class);
+            testLauncher.startAll();
+            latch = new CountDownLatch(1);
+            setupComplete = true;
+        }
     }
 
     static {
