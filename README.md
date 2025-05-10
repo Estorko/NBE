@@ -40,34 +40,49 @@ appium
 ## Project Structure
 
 ```
-src/
-├── main/
-│   └── java/
-│       └── com/
-│           └── nbe/
-│               └── automation/
-│                   ├── base/
-│                   │   └── TestEnvironment.java
-│                   └── utils/
-│                       ├── AppiumUtils.java
-│                       ├── ConfigReader.java
-│                       └── LoggerUtil.java
-└── test/
-    └── java/
-        └── com/
-            └── nbe/
-                └── automation/
-                    └── NBETest.java
+NBE Appium Automation
+---------------------
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── nbe
+    │   │           └── automation
+    │   │               ├── base
+    │   │               │   └── BasePage.java
+    │   │               ├── config
+    │   │               │   ├── AppiumServerManager.java
+    │   │               │   ├── AppProperties.java
+    │	│	            │   ├── DriverFactory.java
+    │   │               │   ├── EmulatorManager.java
+    │   │               │   └── TestLauncher.java
+    │   │               ├── pages
+    │   │               │   └── youtube
+    │   │               │       ├── ChannelPage.java
+    │   │               │       ├── HomePage.java
+    │   │               │       └── SearchResultsPage.java
+    │   │               └── utils
+    │   │                   └── LoggerUtil.java
+    │   └── resources
+    │       ├── application.properties
+    │       └── log4j2.xml
+    └── test
+        ├── java
+        │   └── com
+        │       └── nbe
+        │           └── automation
+        │               └── tests
+        │                   ├── base
+        │                   │    └── BaseTest.java
+        │                   ├── YoutubeParallelTest1.java
+        │                   ├── YoutubeParallelTest2.java
+        │                   ├── YoutubeParallelTest3.java
+        │                   ├── YoutubeParallelTest4.java
+        │                   ├── YoutubeParallelTest5.java
+        │                   └── YoutubeParallelTest6.java
+        └── resources
+            └── junit-platform.properties          
 ```
-
-## Configuration
-
-Before running the tests, ensure your Android device/emulator is connected and verify:
-
-1. Device name (run `adb devices`)
-2. App package: `com.ofss.obdx.and.nbe.com.eg`
-3. App activity: `com.ofss.digx.mobile.android.MainActivity`
-
 ## Running Tests
 
 1. Make sure Appium server is running
@@ -80,48 +95,8 @@ mvn clean test
 3. Run specific test class:
 
 ```bash
-mvn test -Dtest=NBETest
+mvn test -Dtest=YoutubeParallelTest1
 ```
-
-## Test Flow
-
-The test suite includes the following test cases:
-
-1. Login with valid credentials
-2. Select account and open Account Overview
-3. Get and mask account number and IBAN
-4. Verify scroll functionality
-5. Logout from the application
-
-## Finding Elements
-
-You can find elements using various locators in the `AppiumUtils` class:
-
-```java
-// By Accessibility ID
-appiumUtils.findByAccessibilityId("elementId");
-
-// By Text
-appiumUtils.findByText("text");
-
-// By ID
-appiumUtils.findById("elementId");
-
-// By Class Name and Instance
-appiumUtils.findByClassNameAndInstance("className", instance);
-
-// Click element
-appiumUtils.clickByText("text");
-appiumUtils.clickById("elementId");
-appiumUtils.clickByAccessibilityId("elementId");
-
-// Input text
-appiumUtils.sendKeysById("elementId", "text");
-
-// Check visibility
-boolean isVisible = appiumUtils.isDisplayedByText("text");
-```
-
 ## Logging
 
 The project uses Log4j2 for logging. Logs are written to both console and file:
@@ -129,10 +104,3 @@ The project uses Log4j2 for logging. Logs are written to both console and file:
 - Console output
 - File: `logs/NBEAutomation.log`
 
-## Error Handling
-
-All tests include proper error handling:
-
-- Detailed error logging
-- Test failures with descriptive messages
-- Proper cleanup after each test
