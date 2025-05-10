@@ -28,7 +28,7 @@ public class AppiumServerManager {
             pb.redirectError(outputFile);
             pb.start();
             waitForAppiumServer(port, 60000);
-            LoggerUtil.info("Appium server is up and running on port " + port, this.getClass());
+            LoggerUtil.info(String.format("Appium server is up and running on port [%s]", port), this.getClass());
         } catch (IOException | InterruptedException e) {
             LoggerUtil.error("Failed to start Appium on port " + port, e, this.getClass());
             throw new RuntimeException(e);

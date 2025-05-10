@@ -1,5 +1,6 @@
 package com.nbe.automation.config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -30,12 +31,13 @@ public class TestLauncher {
         synchronized (LOCK) {
             if (initialized)
                 return;
+
             udidPool.clear();
             ExecutorService executor = Executors.newFixedThreadPool(emulatorNames.size());
-
+            List<Future<?>> futures = new ArrayList<>();
             for (int i = 0; i < emulatorNames.size(); i++) {
                 final int index = i;
-                executor.submit(() -> {
+                futures.add(executor.submit(() -> {
                     String emulatorName = emulatorNames.get(index);
                     int emulatorPort = 5554 + (index * 2);
                     int appiumPort = BASEPORT + index;
@@ -55,10 +57,20 @@ public class TestLauncher {
                         LoggerUtil.error(String.format("Error during setup for [%s]: %s", emulatorName, e.getMessage()),
                                 e, this.getClass());
                     }
-                });
+                }));
             }
+
             initialized = true;
             shutdownExecutorService(executor);
+            for (Future<?> future : futures) {
+                try {
+                    future.get();
+                } catch (ExecutionException e) {
+                    LoggerUtil.error("Error in task: " + e.getMessage(), e, TestLauncher.class);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
         }
     }
 

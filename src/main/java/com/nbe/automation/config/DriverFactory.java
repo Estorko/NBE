@@ -6,13 +6,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.nbe.automation.utils.LoggerUtil;
 
 import io.appium.java_client.android.AndroidDriver;
-import lombok.Getter;
 
-@Getter
 public class DriverFactory {
 
     private static final Map<String, AndroidDriver> drivers = new ConcurrentHashMap<>();
@@ -34,7 +33,7 @@ public class DriverFactory {
             return driver;
         }
         try {
-            LoggerUtil.info("Creating driver for device: " + deviceName, this.getClass());
+            LoggerUtil.info(String.format("Creating driver for emulator: [%s].", udid), this.getClass());
             DesiredCapabilities caps = new DesiredCapabilities();
             caps.setCapability("platformName", appProperties.getPlatformName());
             caps.setCapability("automationName", appProperties.getAutomationName());
@@ -52,10 +51,11 @@ public class DriverFactory {
 
             driver = new AndroidDriver(new URI(serverUrl).toURL(), caps);
             driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(30));
+            waitUntilDriverIsReady(driver, udid);
             LoggerUtil.info(String.format("Driver created successfully for [%s]", udid), this.getClass());
             drivers.put(udid, driver);
         } catch (Exception e) {
-            throw new RuntimeException("Failed to initialize driver", e);
+            throw new RuntimeException(String.format("Failed to initialize driver for emulator: [%s].", udid), e);
         }
         return driver;
     }
@@ -66,6 +66,33 @@ public class DriverFactory {
             throw new IllegalStateException("Driver not initialized for UDID: " + udid);
         }
         return driver;
+    }
+
+    private void waitUntilDriverIsReady(AndroidDriver driver, String udid) {
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(30));
+        String expectedActivity = appProperties.getYoutubeAppActivity();
+        String expectedActivitySimple = expectedActivity.startsWith(appProperties.getYoutubeAppPackage())
+                ? expectedActivity.replaceFirst(appProperties.getYoutubeAppPackage(), "")
+                : expectedActivity;
+
+        try {
+            wait.until(d -> {
+                try {
+                    String currentActivity = driver.currentActivity();
+                    return currentActivity != null && !currentActivity.isEmpty() &&
+                            (currentActivity.equals(expectedActivitySimple) ||
+                                    currentActivity.equals(expectedActivity) ||
+                                    currentActivity.endsWith(expectedActivitySimple.replace(".", "")));
+                } catch (Exception e) {
+                    return false;
+                }
+            });
+            LoggerUtil.info(String.format("Driver is fully ready and active for emulator: [%s].", udid),
+                    DriverFactory.class);
+        } catch (Exception e) {
+            LoggerUtil.error(String.format("Driver failed to be ready within timeout for emulator: [%s].", udid), e,
+                    DriverFactory.class);
+        }
     }
 
     public static void quitAll() {

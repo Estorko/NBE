@@ -109,7 +109,6 @@ public class EmulatorManager {
         long startTime = System.currentTimeMillis();
         while (System.currentTimeMillis() - startTime < timeoutMillis) {
             if (isEmulatorVisible(emulatorId)) {
-                LoggerUtil.info(String.format("Emulator [%s] is now online.", emulatorId), this.getClass());
                 return true;
             }
             try {
